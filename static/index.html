@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title class="brand-text-name">SkillSum ResultSetu - SkillSum Innovations</title>
-  <meta name="description" content="Free and open-source bulk academic result processing utility by SkillSum Innovations.">
-  <meta name="theme-color" content="#14532d">
+  <meta name="description" content="Free and open-source bulk academic result processing utility by SkillSum Innovations. Founded by Aditya Rajak.">
+  <meta name="theme-color" content="#654321">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Self-contained local vendor library for client-side Excel parsing -->
@@ -20,13 +20,13 @@
     ⚠️ You are currently offline. University result queries require an active internet connection.
   </div>
 
-  <!-- Top Navigation Header -->
+  <!-- Top Sticky Navigation Header -->
   <header>
     <div class="header-container">
       <a href="#home" class="brand" data-nav="home">
-        <div class="brand-icon">
-          <!-- Abstract clean SVG icon: Document + Academic Marksheet + Download Arrow -->
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <img src="/static/logo.webp" alt="SkillSum Logo" class="brand-logo-img" id="brandLogoImg" onerror="this.style.display='none'; document.getElementById('brandFallbackIcon').style.display='flex';" />
+        <div class="brand-icon-fallback" id="brandFallbackIcon" style="display: none;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -35,13 +35,15 @@
             <path d="M12 11v6m-3-3l3 3 3-3" stroke="currentColor" stroke-width="2"></path>
           </svg>
         </div>
-        <div>
+        <div class="brand-text-block">
           <div class="brand-title brand-text-name">SkillSum ResultSetu</div>
-          <div class="brand-subtitle">SkillSum Innovations</div>
+          <div class="brand-subtitle">
+            <span>SkillSum Innovations</span> &bull; <span class="brand-founder-tag">Founder: Aditya Rajak</span>
+          </div>
         </div>
       </a>
 
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <div class="header-actions">
         <!-- Language Switcher -->
         <div class="lang-selector">
           <button id="btnLangEn" class="btn-lang active" title="English">EN</button>
@@ -52,11 +54,10 @@
 
       <ul class="nav-links" id="navLinks">
         <li><a href="#home" class="nav-link active" data-nav="home" data-i18n="nav_home">Home</a></li>
-        <li><a href="#how-it-works" class="nav-link" data-nav="how-it-works" data-i18n="nav_how_it_works">How It Works</a></li>
+        <li><a href="#process" class="nav-link" data-nav="process" data-i18n="nav_process">Process Results</a></li>
         <li><a href="#universities" class="nav-link" data-nav="universities" data-i18n="nav_universities">Supported Universities</a></li>
-        <li><a href="#faq" class="nav-link" data-nav="faq" data-i18n="nav_faq">FAQ</a></li>
-        <li><a href="#history" class="nav-link" data-nav="history" data-i18n="nav_history">Local History</a></li>
-        <li><a href="#contact" class="nav-link" data-nav="contact" data-i18n="nav_contact">Contact</a></li>
+        <li><a href="#guide" class="nav-link" data-nav="guide" data-i18n="nav_guide">User Guide</a></li>
+        <li><a href="#about" class="nav-link" data-nav="about" data-i18n="nav_about">About</a></li>
         <li><a href="#process" class="nav-link btn-nav-cta" data-nav="process" data-i18n="nav_process">Process Results</a></li>
       </ul>
     </div>
@@ -70,11 +71,15 @@
         <div class="hero-pill">
           <span data-i18n="hero_badge">✓ 100% Free & Open Source • MIT License</span>
         </div>
+        <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.35rem; font-weight: 600;" data-i18n="brand_presents">SkillSum Innovations presents</div>
         <h1 class="hero-title brand-text-name">SkillSum ResultSetu</h1>
         <p class="hero-tagline brand-text-tagline" data-i18n="hero_tagline">Simplify bulk academic result processing.</p>
         <div class="hero-actions">
           <a href="#process" class="hero-btn-primary" data-nav="process" data-i18n="hero_launch_btn">
             🚀 Launch Bulk Processing
+          </a>
+          <a href="#guide" class="hero-btn-secondary" data-nav="guide" data-i18n="hero_guide_btn">
+            📖 Read User Guide
           </a>
           <a href="#how-it-works" class="hero-btn-secondary" data-nav="how-it-works" data-i18n="hero_learn_btn">
             Learn How It Works
@@ -87,7 +92,7 @@
           <div class="feature-icon-wrapper">🔒</div>
           <div class="feature-title">Privacy-First Architecture</div>
           <div class="feature-desc">
-            Excel files are parsed locally in your browser. Student lists are not retained permanently, and temporary files expire automatically in 30 minutes.
+            Excel student lists are parsed locally in your browser. Student lists are not retained permanently, and temporary files expire automatically in 30 minutes.
           </div>
         </div>
 
@@ -95,7 +100,7 @@
           <div class="feature-icon-wrapper">🔌</div>
           <div class="feature-title">Pluggable Connectors</div>
           <div class="feature-desc">
-            Modular adapter pattern for university portals (including BTEUP and standard university systems). Reusable connectors can be added cleanly.
+            Modular portal adapters support institutional examination systems (including BTEUP and standard university portals) without hardcoding portal logic.
           </div>
         </div>
 
@@ -103,7 +108,7 @@
           <div class="feature-icon-wrapper">📊</div>
           <div class="feature-title">Dynamic Multi-Format Export</div>
           <div class="feature-desc">
-            Generate Consolidated Master Excel sheets, Subject-wise workbooks, original PDF marksheets, and complete ZIP packages.
+            Generate Consolidated Master Excel workbooks with competition rankings (1224), subject-wise sheets, provisional PDFs, and complete ZIP archives.
           </div>
         </div>
 
@@ -119,18 +124,78 @@
           <div class="feature-icon-wrapper">🎯</div>
           <div class="feature-title">Pre-Flight Validation</div>
           <div class="feature-desc">
-            Automatic column recognition with manual mapping fallback, record preview, empty row detection, and automatic deduplication.
+            Automatic column recognition with manual mapping fallback, 10-row preview, empty row detection, and duplicate review.
           </div>
         </div>
 
         <div class="feature-box">
           <div class="feature-icon-wrapper">🔄</div>
-          <div class="feature-title">Real-Time Progress & Retry</div>
+          <div class="feature-title">Live Progress & Single Retry</div>
           <div class="feature-desc">
             Live execution tracking with progress bars, counters, and single-click retry for any network timeouts or failed student queries.
           </div>
         </div>
       </div>
+
+      <!-- SkillSum Innovations Self-Promotional Section -->
+      <section class="promo-section">
+        <div class="promo-header">
+          <div>
+            <span class="promo-tag" data-i18n="promo_badge">SkillSum Innovations</span>
+            <h2 class="promo-heading" data-i18n="promo_heading">Need Technology Solutions for Your Business?</h2>
+            <p class="promo-subtext" data-i18n="promo_subtext">SkillSum Innovations helps businesses turn ideas into practical digital solutions.</p>
+          </div>
+          <div>
+            <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer" class="btn-promo-primary" data-i18n="promo_cta">
+              Explore SkillSum Services ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="promo-services-grid">
+          <div class="promo-service-card">
+            <div class="promo-service-icon">🌐</div>
+            <div class="promo-service-title" data-i18n="promo_s1_title">Website Development</div>
+            <div class="promo-service-desc" data-i18n="promo_s1_desc">Custom modern websites, responsive web apps, and CMS portals built for performance.</div>
+          </div>
+          <div class="promo-service-card">
+            <div class="promo-service-icon">💻</div>
+            <div class="promo-service-title" data-i18n="promo_s2_title">Software & Management Systems</div>
+            <div class="promo-service-desc" data-i18n="promo_s2_desc">Enterprise management, billing systems, and custom automation software.</div>
+          </div>
+          <div class="promo-service-card">
+            <div class="promo-service-icon">🔌</div>
+            <div class="promo-service-title" data-i18n="promo_s3_title">Embedded Systems & IoT</div>
+            <div class="promo-service-desc" data-i18n="promo_s3_desc">Smart hardware, microcontroller programming, and cloud-connected IoT devices.</div>
+          </div>
+          <div class="promo-service-card">
+            <div class="promo-service-icon">🎬</div>
+            <div class="promo-service-title" data-i18n="promo_s4_title">Video Editing & Production</div>
+            <div class="promo-service-desc" data-i18n="promo_s4_desc">Professional video editing, corporate presentations, and educational media.</div>
+          </div>
+          <div class="promo-service-card">
+            <div class="promo-service-icon">📈</div>
+            <div class="promo-service-title" data-i18n="promo_s5_title">SEO & Digital Marketing</div>
+            <div class="promo-service-desc" data-i18n="promo_s5_desc">Targeted search engine optimization, content strategy, and online brand visibility.</div>
+          </div>
+          <div class="promo-service-card">
+            <div class="promo-service-icon">🤖</div>
+            <div class="promo-service-title" data-i18n="promo_s6_title">AI Solutions & Maintenance</div>
+            <div class="promo-service-desc" data-i18n="promo_s6_desc">AI workflow integration, smart data utilities, and dedicated software maintenance.</div>
+          </div>
+        </div>
+
+        <div class="promo-cta-row">
+          <div class="promo-company-info">
+            <strong>SkillSum Innovations</strong> &bull; Founded by Aditya Rajak &bull; Delivering tailored engineering solutions.
+          </div>
+          <div>
+            <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer" style="color: var(--primary-main); font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+              Visit skillsum.in &rarr;
+            </a>
+          </div>
+        </div>
+      </section>
     </section>
 
 
@@ -148,10 +213,10 @@
         <div class="form-group">
           <label for="portalUrl" data-i18n="step1_input_label">Result Portal URL</label>
           <div class="input-with-button">
-            <input
-              type="url"
-              id="portalUrl"
-              placeholder="https://result.bteexam.com/even/main/rollno.aspx"
+            <input 
+              type="url" 
+              id="portalUrl" 
+              placeholder="https://result.bteexam.com/even/main/rollno.aspx" 
               value="https://result.bteexam.com/even/main/rollno.aspx"
             />
             <button class="btn btn-primary" id="btnValidateUrl" data-i18n="step1_validate_btn">Validate Portal</button>
@@ -159,18 +224,21 @@
           
           <div class="quick-links">
             <span class="quick-links-title" data-i18n="step1_quick_title">Quick Select:</span>
-            <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx" data-i18n="step1_bteup_btn">BTEUP Official Portal</button>
-            <button class="btn-pill" data-url="https://results.university.edu/semester/exam" data-i18n="step1_demo_btn">Standard University (Demo & Testing)</button>
+            <button class="btn-pill" id="btnQuickBteup" data-url="https://result.bteexam.com/even/main/rollno.aspx" data-i18n="step1_bteup_btn">BTEUP Official Portal</button>
+            <button class="btn-pill" id="btnQuickDemo" data-url="https://results.university.edu/semester/exam" data-i18n="step1_demo_btn">Standard University (Demo & Testing)</button>
           </div>
         </div>
 
-        <div id="portalStatusBox" class="portal-status-box matched" style="display: none;">
+        <div id="portalStatusBox" class="portal-status-box matched">
           <div id="portalStatusIcon">✓</div>
-          <div id="portalStatusText"></div>
+          <div>
+            <strong id="portalName">Board of Technical Education Uttar Pradesh (BTEUP)</strong>
+            <div id="portalStatusText" style="font-size: 0.8rem; opacity: 0.85;">Compatible portal connector active. Ready to extract semester marks.</div>
+          </div>
         </div>
       </div>
 
-      <!-- STEP 2: Excel Upload -->
+      <!-- STEP 2: Excel Upload & Client-Side Mapping -->
       <div class="step-card" id="step2-card">
         <div class="step-header">
           <div class="step-number">2</div>
@@ -179,23 +247,25 @@
         </div>
 
         <div class="upload-dropzone" id="dropzone">
-          <div class="upload-icon">📄</div>
+          <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
+          <div class="upload-icon">📂</div>
           <div class="upload-text" data-i18n="step2_drop_text">Drag & drop your student Excel file here, or click to browse</div>
           <div class="upload-hint" data-i18n="step2_drop_hint">Supports .xlsx and .xls files containing student enrollments or roll numbers</div>
           <div>
             <span class="privacy-badge-local" data-i18n="step2_badge_local">🔒 Client-Side Local Parsing Enabled</span>
           </div>
-          <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
         </div>
 
         <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-          <span style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="step2_template_text">Need a structured format template?</span>
-          <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download data-i18n="step2_template_btn">
+          <div style="font-size: 0.82rem; color: var(--text-muted);" data-i18n="step2_template_text">
+            Need a structured format template?
+          </div>
+          <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" data-i18n="step2_template_btn">
             ⬇ Download Sample Excel Template
           </a>
         </div>
 
-        <!-- Analysis & Mapping -->
+        <!-- Dynamic Upload Analysis Panel -->
         <div id="uploadAnalysisPanel" style="display: none; margin-top: 1.25rem;">
           <div class="upload-summary-grid">
             <div class="stat-chip">
@@ -204,47 +274,46 @@
             </div>
             <div class="stat-chip">
               <div class="stat-chip-label" data-i18n="step2_valid_rows">Valid Records</div>
-              <div class="stat-chip-val" id="statValidRows" style="color: var(--success);">0</div>
+              <div class="stat-chip-val" style="color: var(--success);" id="statValidRows">0</div>
             </div>
             <div class="stat-chip">
               <div class="stat-chip-label" data-i18n="step2_dup_rows">Duplicate Rows</div>
-              <div class="stat-chip-val" id="statDuplicateRows" style="color: var(--danger);">0</div>
+              <div class="stat-chip-val" style="color: var(--warning);" id="statDuplicateRows">0</div>
             </div>
             <div class="stat-chip">
               <div class="stat-chip-label" data-i18n="step2_empty_rows">Empty Rows</div>
-              <div class="stat-chip-val" id="statEmptyRows" style="color: var(--warning);">0</div>
+              <div class="stat-chip-val" style="color: var(--danger);" id="statEmptyRows">0</div>
             </div>
           </div>
 
-          <div style="margin: 1rem 0 0.5rem 0;">
-            <label style="font-size: 0.9rem; font-weight: 700;" data-i18n="step2_map_label">Confirm or Map Excel Columns:</label>
-          </div>
+          <!-- Column Mapping Fallback -->
           <div class="mapping-grid">
-            <div class="form-group" style="margin-bottom: 0;">
+            <div>
               <label for="mapEnrollment" data-i18n="step2_map_enr">Enrollment / Roll No Column *</label>
               <select id="mapEnrollment"></select>
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
+            <div>
               <label for="mapDob" data-i18n="step2_map_dob">Date of Birth (DOB) Column</label>
               <select id="mapDob"></select>
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
+            <div>
               <label for="mapName" data-i18n="step2_map_name">Student Name Column</label>
               <select id="mapName"></select>
             </div>
           </div>
 
-          <div style="margin: 1rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);" data-i18n="step2_preview_title">Student Records Preview (First 10 Rows):</span>
-            <span id="previewNotice" style="font-size: 0.75rem; color: var(--text-muted);"></span>
-          </div>
-          <div class="table-container">
-            <table id="previewTable">
-              <thead>
-                <tr id="previewTableHead"></tr>
-              </thead>
-              <tbody id="previewTableBody"></tbody>
-            </table>
+          <!-- 10-Row Client-Side Preview Table -->
+          <div style="margin-top: 1rem;">
+            <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem;" data-i18n="step2_preview_title">
+              Student Records Preview (First 10 Rows):
+            </div>
+            <div class="table-container">
+              <table>
+                <thead id="previewTableHead"></thead>
+                <tbody id="previewTableBody"></tbody>
+              </table>
+            </div>
+            <div id="previewNotice" style="font-size: 0.8rem; color: var(--text-muted);"></div>
           </div>
         </div>
       </div>
@@ -295,30 +364,28 @@
             <span class="option-label" data-i18n="step3_opt_pdf">Individual Performance PDF</span>
           </label>
           <label class="option-card">
-            <input type="checkbox" id="optForceDownload" />
+            <input type="checkbox" id="optForce" />
             <span class="option-label" data-i18n="step3_opt_force">Force Re-download (Bypass Cache)</span>
           </label>
         </div>
 
-        <div style="margin-top: 1.25rem;">
-          <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;" data-i18n="step3_start_btn">
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <button class="btn btn-primary" id="btnStartBulk" data-i18n="step3_start_btn">
             ▶ Start Bulk Processing
           </button>
         </div>
       </div>
 
-      <!-- STEP 4: Live Progress & Results -->
+      <!-- STEP 4: Live Processing Dashboard -->
       <div class="progress-card" id="step4-card" style="display: none;">
         <div class="progress-header">
           <div>
-            <span style="font-size: 1.15rem; font-weight: 700;" data-i18n="step4_processing_title">Processing Students</span>
-            <span id="currentStatusBadge" class="badge badge-info" style="margin-left: 0.5rem;">Running</span>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--primary-deep);" data-i18n="step4_processing_title">Processing Students</h3>
+            <span id="currentStatusBadge" class="badge badge-info">Initializing...</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="font-size: 0.95rem; font-weight: 700;" id="progressPercentage">0%</div>
-            <button class="btn btn-secondary btn-sm" id="btnCancelProcess" style="background: #fee2e2; color: #991b1b; border-color: #fca5a5;" data-i18n="step4_cancel_btn">
-              ⏹ Cancel Processing
-            </button>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <div id="progressPercentage" style="font-size: 1.35rem; font-weight: 800; color: var(--primary-deep);">0%</div>
+            <button class="btn btn-danger btn-sm" id="btnCancelProcess" data-i18n="step4_cancel_btn">⏹ Cancel Processing</button>
           </div>
         </div>
 
@@ -345,52 +412,55 @@
           </div>
         </div>
 
-        <!-- Privacy-Safe Activity Log -->
-        <div class="terminal-box" id="logTerminal">
-          <div>[System] Initializing processing task...</div>
+        <!-- Privacy-Masked Terminal Logs -->
+        <div class="terminal-box" id="terminalLogs">
+          <div>[System] Ready to start bulk extraction session...</div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span style="font-weight: 700; font-size: 0.9rem;" data-i18n="step4_stream_title">Live Result Stream:</span>
-          <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;" data-i18n="step4_retry_failed_btn">
-            🔄 Retry All Failed
-          </button>
-        </div>
-        <div class="table-container" style="max-height: 340px; overflow-y: auto;">
-          <table id="liveResultsTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Enrollment</th>
-                <th>Student Name</th>
-                <th>Total Marks</th>
-                <th>Percentage</th>
-                <th>Result</th>
-                <th>Status</th>
-                <th>Marksheet</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="liveResultsBody"></tbody>
-          </table>
+        <!-- Live Processing Stream Table -->
+        <div style="margin-top: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h4 style="font-size: 0.95rem; font-weight: 700;" data-i18n="step4_stream_title">Live Result Stream:</h4>
+            <button class="btn btn-secondary btn-sm" id="btnRetryAllFailed" style="display: none;" data-i18n="step4_retry_failed_btn">
+              🔄 Retry All Failed
+            </button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Enrollment</th>
+                  <th>Student Name</th>
+                  <th>Total Marks</th>
+                  <th>Percentage</th>
+                  <th>Status</th>
+                  <th>Verification</th>
+                  <th>Marksheet</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="streamTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- STEP 5: Export Artifacts -->
+      <!-- STEP 5: Export & Download Dashboard -->
       <div class="step-card" id="step5-card" style="display: none;">
         <div class="step-header">
-          <div class="step-number" style="background: var(--success);">5</div>
+          <div class="step-number">✓</div>
           <div class="step-title" data-i18n="step5_title">Export & Download Results</div>
           <div class="step-desc" data-i18n="step5_desc">Dynamic Excel calculations & preserved original marksheets</div>
         </div>
 
         <div class="export-grid">
-          <div class="export-card">
+          <div class="export-card featured">
             <div>
               <div class="export-card-title" data-i18n="step5_cons_title">📊 Consolidated Excel</div>
-              <div class="export-card-desc" data-i18n="step5_cons_desc">Master sheet with student details, evaluated subjects, and dynamic totals.</div>
+              <div class="export-card-desc" data-i18n="step5_cons_desc">Master sheet with student details, evaluated subjects, topper rankings, and class stats.</div>
             </div>
-            <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank" data-i18n="step5_cons_btn">Download Excel (.xlsx)</a>
+            <a href="#" id="btnDownloadConsolidated" class="btn btn-primary btn-sm" data-i18n="step5_cons_btn">Download Excel (.xlsx)</a>
           </div>
 
           <div class="export-card">
@@ -398,15 +468,15 @@
               <div class="export-card-title" data-i18n="step5_subj_title">📑 Subject-Wise Sheets</div>
               <div class="export-card-desc" data-i18n="step5_subj_desc">Dedicated worksheet tab per subject with Theory, Practical & Sessional splits.</div>
             </div>
-            <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank" data-i18n="step5_subj_btn">Download Subject Excel</a>
+            <a href="#" id="btnDownloadSubject" class="btn btn-secondary btn-sm" data-i18n="step5_subj_btn">Download Subject Excel</a>
           </div>
 
           <div class="export-card">
             <div>
               <div class="export-card-title" data-i18n="step5_zip_title">📂 Marksheets Archive</div>
-              <div class="export-card-desc" data-i18n="step5_zip_desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
+              <div class="export-card-desc" data-i18n="step5_zip_desc">ZIP archive containing all downloaded student provisional marksheet PDFs.</div>
             </div>
-            <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank" data-i18n="step5_zip_btn">Download Marksheets (.zip)</a>
+            <a href="#" id="btnDownloadMarksheets" class="btn btn-secondary btn-sm" data-i18n="step5_zip_btn">Download Marksheets (.zip)</a>
           </div>
 
           <div class="export-card featured">
@@ -414,54 +484,245 @@
               <div class="export-card-title" data-i18n="step5_pkg_title">📦 Complete Package</div>
               <div class="export-card-desc" data-i18n="step5_pkg_desc">Full bundle: Consolidated Excel, Subject Sheets, PDFs & Summary report.</div>
             </div>
-            <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank" data-i18n="step5_pkg_btn">Download Full Package (.zip)</a>
+            <a href="#" id="btnDownloadComplete" class="btn btn-primary btn-sm" data-i18n="step5_pkg_btn">Download Full Package (.zip)</a>
           </div>
         </div>
 
-        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <span style="font-size: 0.82rem; color: var(--text-muted);" data-i18n="step5_retention_notice">
+        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="step5_retention_notice">
             Files are retained for 30 minutes under our privacy lifecycle policy.
-          </span>
-          <button class="btn btn-secondary btn-sm" id="btnResetApp" data-i18n="step5_reset_btn">Start New Batch</button>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnResetJob" data-i18n="step5_reset_btn">
+            Start New Batch
+          </button>
         </div>
       </div>
 
     </section>
 
 
-    <!-- 3. VIEW: LOCAL HISTORY -->
-    <section class="page-view" id="view-history">
+    <!-- 3. VIEW: USER GUIDE (Complete 8-Step Guide & Troubleshooting) -->
+    <section class="page-view" id="view-guide">
       <div class="content-card">
         <div class="content-header">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <div>
-              <h1 class="content-title" data-i18n="history_title">Local Processing History</h1>
-              <div class="content-subtitle" data-i18n="history_desc">Stored only in your browser's local storage. Never sent to any server.</div>
-            </div>
-            <button class="btn btn-danger btn-sm" id="btnClearHistory" data-i18n="history_clear_all">Clear All History</button>
-          </div>
+          <h1 class="content-title" data-i18n="guide_title">Comprehensive User Guide</h1>
+          <div class="content-subtitle" data-i18n="guide_subtitle">Step-by-step instructions for students, educators, and college administrators</div>
         </div>
+
         <div class="content-body">
           <div class="callout-box">
-            <strong>Privacy Guarantee:</strong> Browser history records only batch timestamp, record counts, and status. Raw student names, roll numbers, marks, and result files are <strong>never</strong> saved to browser history.
+            <strong>Getting Started:</strong> <span class="brand-text-name">SkillSum ResultSetu</span> is a free educational utility by <strong>SkillSum Innovations</strong> designed to automate bulk academic result extraction from university portals. It runs without user registration, requires no software installation, and processes student lists locally in your web browser.
           </div>
-          <div class="table-container">
-            <table id="historyTable">
+
+          <!-- Step 1 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">1</span>
+              <h3 class="guide-step-title" data-i18n="guide_step1_title">Step 1: Prepare Your Excel File</h3>
+            </div>
+            <p>
+              Prepare a standard spreadsheet containing your students' examination identifiers in <code>.xlsx</code> or <code>.xls</code> format.
+            </p>
+            <ul>
+              <li><strong>Required Column:</strong> Student Enrollment Number or Roll Number.</li>
+              <li><strong>Optional Columns:</strong> Date of Birth (required only if the target examination portal requires DOB authentication), Student Name, Branch/Department.</li>
+            </ul>
+            <p><strong>Example of a properly formatted student list:</strong></p>
+            <table class="guide-table-example">
               <thead>
                 <tr>
-                  <th data-i18n="history_col_date">Date & Time</th>
-                  <th data-i18n="history_col_portal">Portal / University</th>
-                  <th data-i18n="history_col_records">Records</th>
-                  <th data-i18n="history_col_status">Status</th>
-                  <th data-i18n="history_col_actions">Actions</th>
+                  <th>Roll_No</th>
+                  <th>Student_Name</th>
+                  <th>DOB</th>
+                  <th>Branch</th>
                 </tr>
               </thead>
-              <tbody id="historyTableBody">
+              <tbody>
                 <tr>
-                  <td colspan="5" style="text-align: center; color: var(--text-muted);" data-i18n="history_empty">No local processing history recorded yet.</td>
+                  <td>E2100456001</td>
+                  <td>Amit Kumar</td>
+                  <td>12/04/2003</td>
+                  <td>Computer Science</td>
+                </tr>
+                <tr>
+                  <td>E2100456002</td>
+                  <td>Priya Sharma</td>
+                  <td>25/08/2002</td>
+                  <td>Electrical Engg</td>
+                </tr>
+                <tr>
+                  <td>E2100456003</td>
+                  <td>Rahul Singh</td>
+                  <td>05/11/2003</td>
+                  <td>Mechanical Engg</td>
                 </tr>
               </tbody>
             </table>
+            <div style="margin-top: 0.5rem;">
+              <a href="/api/download/sample-template" class="btn btn-secondary btn-sm">⬇ Download Ready Sample Excel Template</a>
+            </div>
+          </div>
+
+          <!-- Step 2 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">2</span>
+              <h3 class="guide-step-title" data-i18n="guide_step2_title">Step 2: Upload & Review Student List</h3>
+            </div>
+            <p>
+              Drag and drop your Excel file onto the upload zone or click to select the file from your computer or phone.
+            </p>
+            <ul>
+              <li><strong>Browser-Side Local Parsing:</strong> The tool reads rows instantly in memory using client-side JavaScript. Your file does not leave your browser for preview.</li>
+              <li><strong>Automatic Column Detection:</strong> Standard headers like <code>Roll No</code>, <code>Enrollment</code>, <code>DOB</code>, and <code>Name</code> are matched automatically. If your headers differ, use the dropdown selectors to map them manually.</li>
+              <li><strong>Pre-Flight Quality Review:</strong> Inspect the summary chips for valid records, duplicate student rows, and empty rows. Duplicates are highlighted with row indicators.</li>
+            </ul>
+          </div>
+
+          <!-- Step 3 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">3</span>
+              <h3 class="guide-step-title" data-i18n="guide_step3_title">Step 3: Enter University Result Portal URL</h3>
+            </div>
+            <p>
+              Paste the public URL of the college or examination board result page into the portal input field.
+            </p>
+            <ul>
+              <li>Click <strong>Validate Portal</strong> to confirm connector compatibility. The system indicates whether a specialized portal adapter (such as BTEUP) is active.</li>
+              <li><strong>Authentication Notice:</strong> Portals protected by graphical CAPTCHAs, OTPs, or student credentials cannot be bypassed. The tool operates solely on open, public examination result lookup endpoints.</li>
+            </ul>
+          </div>
+
+          <!-- Step 4 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">4</span>
+              <h3 class="guide-step-title" data-i18n="guide_step4_title">Step 4: Review Privacy Notice & Confirm</h3>
+            </div>
+            <p>
+              Before processing starts, a transparent consent modal details the exact data lifecycle:
+            </p>
+            <ul>
+              <li>Only the enrollment number and DOB leave the browser to query the examination server.</li>
+              <li>Requests are sent directly to the official university website.</li>
+              <li>No permanent database records are created.</li>
+              <li>Temporary exports are stored under a 30-minute Time-To-Live (TTL) expiration.</li>
+            </ul>
+          </div>
+
+          <!-- Step 5 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">5</span>
+              <h3 class="guide-step-title" data-i18n="guide_step5_title">Step 5: Monitor Live Bulk Processing</h3>
+            </div>
+            <p>
+              Watch real-time progress on the interactive dashboard:
+            </p>
+            <ul>
+              <li><strong>Progress Indicators:</strong> Real-time progress bar, percentage completion, and live counters for Total, Success, Failed, and Skipped.</li>
+              <li><strong>Privacy-Masked Terminal Logs:</strong> Enrollment IDs are masked (e.g. <code>...4001</code>) in the log feed.</li>
+              <li><strong>Safe Cancellation:</strong> Click <strong>Cancel Processing</strong> anytime to stop querying without losing previously extracted students.</li>
+              <li><strong>Retry Options:</strong> Click individual "Retry" links on failed students or click <strong>Retry All Failed</strong>.</li>
+            </ul>
+          </div>
+
+          <!-- Step 6 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">6</span>
+              <h3 class="guide-step-title" data-i18n="guide_step6_title">Step 6: Verify Extracted Marks & Integrity</h3>
+            </div>
+            <p>
+              The built-in verification engine automatically inspects extracted results:
+            </p>
+            <ul>
+              <li><strong>Marks Boundary Checks:</strong> Flags records where obtained marks exceed maximum marks.</li>
+              <li><strong>Negative Marks Alert:</strong> Detects invalid negative values.</li>
+              <li><strong>Unpublished/Missing Marks:</strong> Flags incomplete records without inserting misleading silent zeroes.</li>
+              <li><strong>Integrity Badges:</strong> Verified students receive a green badge; students with notices show an alert icon with details.</li>
+            </ul>
+          </div>
+
+          <!-- Step 7 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">7</span>
+              <h3 class="guide-step-title" data-i18n="guide_step7_title">Step 7: Download Reports & Packages</h3>
+            </div>
+            <p>
+              Download your complete academic result dataset in your preferred formats:
+            </p>
+            <ul>
+              <li><strong>Consolidated Excel (.xlsx):</strong> Contains 4 sheets — Master Results, Topper Rankings (tied competition rank 1224), Performance Statistics (average, median, pass rate), and Verification Notices. Protected against CSV formula injection.</li>
+              <li><strong>Subject-Wise Excel (.xlsx):</strong> Separate tab per subject detailing Theory, Practical, and Sessional splits.</li>
+              <li><strong>Marksheets Archive (.zip):</strong> Clean ReportLab-generated provisional academic performance report PDFs for every student.</li>
+              <li><strong>Complete Package (.zip):</strong> Consolidated Excel, Subject Sheets, and all student PDFs in one unified archive.</li>
+            </ul>
+          </div>
+
+          <!-- Step 8 Guide -->
+          <div class="guide-step-card">
+            <div class="guide-step-header">
+              <span class="guide-step-badge">8</span>
+              <h3 class="guide-step-title" data-i18n="guide_step8_title">Step 8: Manage Local Browser History</h3>
+            </div>
+            <p>
+              Your past processing sessions are stored exclusively in your browser's <code>localStorage</code>.
+            </p>
+            <ul>
+              <li>Only anonymized metadata is stored: Job ID, Date/Time, University Portal, and Record Count.</li>
+              <li>No student names or academic marks are stored in history.</li>
+              <li>You can delete individual history entries or click <strong>Clear All History</strong> anytime.</li>
+              <li>Clearing browser storage or browsing in private/incognito mode removes local history automatically.</li>
+            </ul>
+          </div>
+
+          <!-- Troubleshooting Section -->
+          <h2>Common Issues & Troubleshooting</h2>
+          <div class="trouble-grid">
+            <div class="trouble-card">
+              <h4>Invalid Excel File</h4>
+              <p>Ensure the file is a valid <code>.xlsx</code> or <code>.xls</code> workbook and is not password-protected.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>Missing Column Mapping</h4>
+              <p>If your header is unusual, manually choose the column representing Enrollment/Roll Number in the Step 2 mapping dropdown.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>Duplicate Roll Numbers</h4>
+              <p>Duplicate rows are detected automatically. Check the duplicates count chip; duplicate rows are highlighted in the preview.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>Unsupported University Portal</h4>
+              <p>If your portal is not currently supported, use our Demo University connector for testing or request a custom adapter via our contact channels.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>University Server Unavailable</h4>
+              <p>Official examination portals often experience heavy traffic during result declarations. Wait a few minutes and click "Retry All Failed".</p>
+            </div>
+            <div class="trouble-card">
+              <h4>CAPTCHA or Login Restrictions</h4>
+              <p>Portals requiring interactive CAPTCHAs, OTPs, or student credentials cannot be automated by design.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>Student Record Not Found</h4>
+              <p>Verify that the roll number and DOB format match the exact formatting expected by the university portal.</p>
+            </div>
+            <div class="trouble-card">
+              <h4>Download Link Expired (404)</h4>
+              <p>Generated export files expire after 30 minutes under our privacy lifecycle policy. Please re-run the batch to generate fresh downloads.</p>
+            </div>
+          </div>
+
+          <!-- User Guide CTA -->
+          <div style="background: var(--main-cream); border: 1px solid var(--border); padding: 1.75rem; border-radius: var(--radius-md); text-align: center; margin-top: 2rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--primary-deep); margin-bottom: 0.5rem;">Ready to Process Your Results?</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.92rem;">Launch the free bulk result processing workflow now. No login required.</p>
+            <a href="#process" class="btn btn-primary" data-nav="process" data-i18n="guide_start_btn">
+              🚀 Launch Bulk Processing Now
+            </a>
           </div>
         </div>
       </div>
@@ -473,55 +734,33 @@
       <div class="content-card">
         <div class="content-header">
           <h1 class="content-title">How It Works</h1>
-          <div class="content-subtitle">Architecture and workflow of the bulk result processing utility.</div>
+          <div class="content-subtitle">Architectural workflow of SkillSum ResultSetu</div>
         </div>
         <div class="content-body">
+          <h2>1. Client-Side Excel Parsing</h2>
           <p>
-            <strong class="brand-text-name">SkillSum ResultSetu</strong> operates on a modular, privacy-first pipeline that combines browser-local file processing with dedicated server-side university connectors.
+            When you select or drop a student Excel file, it is processed directly in your browser using <code>xlsx.full.min.js</code>. The application detects columns, cleans whitespace, checks for duplicate roll numbers, and displays a 10-row preview without uploading the file to any server.
           </p>
 
-          <h2>The 4-Stage Lifecycle</h2>
-
-          <h3>Stage 1: Browser-Local Excel Parsing</h3>
+          <h2>2. University Portal Adapter Matching</h2>
           <p>
-            When you select an Excel spreadsheet (<code>.xlsx</code> or <code>.xls</code>), the file is read and parsed locally inside your web browser using client-side binary interpreters. The browser detects columns, extracts unique student identifiers, counts duplicates, and identifies empty rows without uploading the original Excel document to the server for preview.
+            The examination portal URL is checked against our connector registry. Validated URLs are checked against SSRF security guards blocking internal/loopback IPs. Compatible adapters (e.g. BTEUP, standard demo) configure the appropriate request payloads.
           </p>
 
-          <h3>Stage 2: Portal Connector Routing</h3>
+          <h2>3. Automated Bulk Extraction Engine</h2>
           <p>
-            Each university examination portal has unique form structures, URL patterns, session tokens, and HTML layouts. The application uses a pluggable <strong>Connector/Adapter Pattern</strong>:
+            Upon your explicit consent, student identifiers are sent to the backend worker. The connector dispatches polite requests with built-in delays, extracts subject-wise scores, calculates overall percentages, and verifies marks integrity.
           </p>
-          <ul>
-            <li>The system inspects the URL entered by the user.</li>
-            <li>It identifies a matching connector (e.g. BTEUP Connector or Demo Reference Connector).</li>
-            <li>If an arbitrary URL is supplied without a matching connector, the utility explains why an adapter is required rather than simulating fake results.</li>
-          </ul>
 
-          <h3>Stage 3: Automated Query & Marksheet Extraction</h3>
+          <h2>4. Dynamic Workbooks & Standardized PDFs</h2>
           <p>
-            The backend connector processes students sequentially or with polite rate limiting to prevent overwhelming educational institutions:
+            Results are structured into OpenPyXL workbooks with sanitized formula cells, competition rankings (1224), and summary statistics. Individual provisional performance reports are formatted using ReportLab.
           </p>
-          <ul>
-            <li>Navigates to the verified examination portal.</li>
-            <li>Inputs the student roll number, enrollment number, and date of birth.</li>
-            <li>Dismisses datepicker modals and unexpected alerts.</li>
-            <li>Captures the rendered marksheet using Chromium CDP (Chrome DevTools Protocol) printToPDF.</li>
-            <li>Extracts subject marks, theory scores, practical evaluations, and grand totals directly from the marksheet DOM.</li>
-          </ul>
 
-          <h3>Stage 4: Dynamic Excel & ZIP Packaging</h3>
+          <h2>5. 30-Minute Automatic Purge</h2>
           <p>
-            Extracted values are compiled into dynamically styled Excel spreadsheets using OpenPyXL:
+            Export packages are saved in a temporary session directory. A background cleaner loop purges all files after 30 minutes, ensuring strict privacy.
           </p>
-          <ul>
-            <li><strong>Consolidated Excel:</strong> Complete master record with all evaluated subjects, percentages, and pass/fail evaluations.</li>
-            <li><strong>Subject-Wise Excel:</strong> Dedicated tabs for each subject detailing Theory, Practical, and Sessional components.</li>
-            <li><strong>Marksheets Archive:</strong> Individual student PDF files compressed into a single clean ZIP file.</li>
-          </ul>
-
-          <div class="callout-box">
-            <strong>Data Integrity Principle:</strong> The utility never assumes arbitrary passing percentages or marks distributions. It extracts actual declared values and preserves original marksheet data.
-          </div>
         </div>
       </div>
     </section>
@@ -531,70 +770,138 @@
     <section class="page-view" id="view-universities">
       <div class="content-card">
         <div class="content-header">
-          <h1 class="content-title">Supported Universities & Portals</h1>
-          <div class="content-subtitle">Directory of active connectors and multi-college adapter guide.</div>
+          <h1 class="content-title">Supported University Connectors</h1>
+          <div class="content-subtitle">Examination portals with active adapter support</div>
         </div>
         <div class="content-body">
           <p>
-            Because university examination portals across India and internationally employ diverse web architectures (ASP.NET WebForms, PHP portals, Single Page Apps, CAPTCHA mechanisms, and PDF generators), arbitrary URLs cannot be automatically parsed without a corresponding connector.
+            <strong class="brand-text-name">SkillSum ResultSetu</strong> uses a modular connector architecture. Portals currently configured include:
           </p>
 
-          <h2>Active Built-in Connectors</h2>
-          <div class="univ-grid" id="univGridContainer">
+          <div class="univ-grid">
             <div class="univ-card">
               <div class="univ-card-header">
-                <div class="univ-name">BTEUP (Board of Technical Education UP)</div>
-                <span class="badge badge-success">Production</span>
+                <span class="univ-name">BTEUP (Board of Technical Education UP)</span>
+                <span class="badge badge-success">Production Active</span>
               </div>
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                Official diploma examination portal (Semester & Annual).
+                Polytechnic semester examination results for diploma engineering students in Uttar Pradesh.
               </p>
-              <div style="font-size: 0.8rem;">
-                <strong>URL:</strong> <code>https://result.bteexam.com/even/main/rollno.aspx</code><br>
-                <strong>Required:</strong> Enrollment Number, Date of Birth (DD/MM/YYYY)
+              <div style="font-size: 0.8rem; font-family: monospace; color: var(--text-muted); background: var(--bg-subtle); padding: 0.35rem 0.5rem; border-radius: 4px;">
+                result.bteexam.com
               </div>
             </div>
 
             <div class="univ-card">
               <div class="univ-card-header">
-                <div class="univ-name">Standard University Demo Portal</div>
-                <span class="badge badge-info">Reference / Demo</span>
+                <span class="univ-name">Standard University Demo Portal</span>
+                <span class="badge badge-info">Testing / Demo</span>
               </div>
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                Multi-subject reference portal for testing, evaluation, and grading verification.
+                Standardized mock university examination portal designed for verification, automated testing, and development.
               </p>
-              <div style="font-size: 0.8rem;">
-                <strong>URL:</strong> <code>https://results.university.edu/semester/exam</code><br>
-                <strong>Required:</strong> Enrollment / Roll Number
+              <div style="font-size: 0.8rem; font-family: monospace; color: var(--text-muted); background: var(--bg-subtle); padding: 0.35rem 0.5rem; border-radius: 4px;">
+                results.university.edu
               </div>
             </div>
           </div>
 
-          <h2>Why Doesn't an Arbitrary URL Work Automatically?</h2>
+          <h2 style="margin-top: 2rem;">Adding Support for Your University</h2>
           <p>
-            Unlike general web scrapers that grab unstructured paragraph text, academic result processing requires 100% precision:
-          </p>
-          <ul>
-            <li>Form input field names vary across institutions (<code>txtRollNo</code>, <code>enrollment</code>, <code>student_id</code>).</li>
-            <li>Some portals require Date of Birth, Mother's Name, or Captcha verification.</li>
-            <li>Marksheet tables use varied layouts for Theory, Practical, Sessional, and Grace Marks.</li>
-          </ul>
-
-          <h2>Adding a New University Connector</h2>
-          <p>
-            Adding support for a new university portal is simple! Create an adapter inheriting from <code>BaseConnector</code> in <code>connectors/</code>, define the URL matching rule and form submission steps, and submit a pull request on our open-source repository.
+            Because every university portal has unique HTML tables and query formats, new connectors are added modularly. If your college or state examination board uses an open result portal, you can request a connector or contribute one via pull request.
           </p>
         </div>
       </div>
     </section>
 
 
-    <!-- 6. VIEW: FAQ -->
+    <!-- 6. VIEW: ABOUT SKILLSUM INNOVATIONS & FOUNDER -->
+    <section class="page-view" id="view-about">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">About SkillSum ResultSetu</h1>
+          <div class="content-subtitle">Independent academic utility by SkillSum Innovations &bull; Founded by Aditya Rajak</div>
+        </div>
+        <div class="content-body">
+          <h2>Project Identity & Mission</h2>
+          <p>
+            <strong class="brand-text-name">SkillSum ResultSetu</strong> is an independent, free, and open-source academic marksheet processing utility developed by <strong>SkillSum Innovations</strong> under the founder leadership of <strong>Aditya Rajak</strong>.
+          </p>
+          <p>
+            The project was conceived with a clear mission: <em>"Simplify bulk academic result processing."</em> In many educational institutions, faculty coordinators and department staff spend hours manually looking up marks for hundreds of students across slow university examination portals. SkillSum ResultSetu provides an automated, reliable, and privacy-preserving bridge.
+          </p>
+
+          <h2>Dual Branding & Ownership</h2>
+          <ul>
+            <li><strong>Product Identity:</strong> SkillSum ResultSetu</li>
+            <li><strong>Company Identity:</strong> SkillSum Innovations (Independent technology provider)</li>
+            <li><strong>Founder Identity:</strong> Aditya Rajak</li>
+            <li><strong>Official Company Website:</strong> <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer" style="color: var(--primary-main); font-weight: 700;">https://skillsum.in/</a></li>
+          </ul>
+
+          <h2>Core Principles</h2>
+          <ul>
+            <li><strong>Completely Free & Open Source:</strong> Distributed under the permissive MIT License. Zero paywalls, zero subscription tiers, and zero commercial API dependencies.</li>
+            <li><strong>No User Accounts:</strong> No registration, logins, passwords, or cloud database storage for student data.</li>
+            <li><strong>Zero Tracking:</strong> No advertising trackers, no Google Analytics, no marketing pixels, and no behavioral surveillance.</li>
+            <li><strong>Data Integrity:</strong> Preserves original university marks without silent zeroes or forced arbitrary passing formulas.</li>
+          </ul>
+
+          <h2>About SkillSum Innovations</h2>
+          <p>
+            SkillSum Innovations is an independent software and technology solutions provider founded by Aditya Rajak. We build modern web applications, management software, embedded IoT systems, and educational utilities designed to empower organizations with practical digital tools.
+          </p>
+          <div style="margin-top: 1rem;">
+            <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+              Explore SkillSum Innovations ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 7. VIEW: LOCAL HISTORY -->
+    <section class="page-view" id="view-history">
+      <div class="content-card">
+        <div class="content-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h1 class="content-title" data-i18n="history_title">Local Processing History</h1>
+            <div class="content-subtitle" data-i18n="history_desc">Stored only in your browser's local storage. Never sent to any server.</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btnClearHistory" data-i18n="history_clear_all">
+            Clear All History
+          </button>
+        </div>
+        <div class="content-body">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="history_col_date">Date & Time</th>
+                  <th data-i18n="history_col_portal">Portal / University</th>
+                  <th data-i18n="history_col_records">Records</th>
+                  <th data-i18n="history_col_status">Status</th>
+                  <th data-i18n="history_col_actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+          <div id="historyEmptyMsg" style="text-align: center; color: var(--text-muted); padding: 2rem; display: none;" data-i18n="history_empty">
+            No local processing history recorded yet.
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 8. VIEW: FAQ -->
     <section class="page-view" id="view-faq">
       <div class="content-card">
         <div class="content-header">
           <h1 class="content-title">Frequently Asked Questions</h1>
-          <div class="content-subtitle">Common questions regarding usage, accuracy, formats, and privacy.</div>
+          <div class="content-subtitle">Practical answers regarding processing, security, and formats.</div>
         </div>
         <div class="content-body">
           <div class="faq-item open">
@@ -661,7 +968,7 @@
     </section>
 
 
-    <!-- 7. VIEW: PRIVACY POLICY -->
+    <!-- 9. VIEW: PRIVACY POLICY -->
     <section class="page-view" id="view-privacy">
       <div class="content-card">
         <div class="content-header">
@@ -690,7 +997,7 @@
           </p>
           <ul>
             <li><strong>Browser-Local Processing:</strong> Excel file reading, row counting, empty row detection, duplicate checks, and 10-row preview generation occur entirely inside your browser using client-side JavaScript. Your original Excel file is not transmitted to our servers for preview.</li>
-            <li><strong>Server-Side Processing:</strong> When you initiate bulk processing, the validated student identifiers (enrollment numbers and DOBs) are transmitted to the backend service to execute the automated portal query, CDP PDF marksheet generation, and OpenPyXL spreadsheet consolidation.</li>
+            <li><strong>Server-Side Processing:</strong> When you initiate bulk processing, the validated student identifiers (enrollment numbers and DOBs) are transmitted to the backend service to execute the automated portal query, PDF marksheet generation, and OpenPyXL spreadsheet consolidation.</li>
           </ul>
 
           <h2>3. Temporary Storage & Automatic Deletion</h2>
@@ -727,7 +1034,7 @@
     </section>
 
 
-    <!-- 8. VIEW: TERMS & CONDITIONS -->
+    <!-- 10. VIEW: TERMS & CONDITIONS -->
     <section class="page-view" id="view-terms">
       <div class="content-card">
         <div class="content-header">
@@ -774,7 +1081,7 @@
     </section>
 
 
-    <!-- 9. VIEW: DISCLAIMER -->
+    <!-- 11. VIEW: DISCLAIMER -->
     <section class="page-view" id="view-disclaimer">
       <div class="content-card">
         <div class="content-header">
@@ -810,7 +1117,7 @@
     </section>
 
 
-    <!-- 10. VIEW: DATA HANDLING & RETENTION -->
+    <!-- 12. VIEW: DATA HANDLING & RETENTION -->
     <section class="page-view" id="view-data-handling">
       <div class="content-card">
         <div class="content-header">
@@ -832,7 +1139,7 @@
           <h2>2. Transient Processing Session</h2>
           <ul>
             <li><strong>Location:</strong> Server temporary folder (<code>temp_storage/{job_id}/</code>).</li>
-            <li><strong>Contents:</strong> Headless Chromium CDP generated marksheet PDFs (<code>marksheets/*.pdf</code>) and exported Excel workbooks (<code>exports/*.xlsx</code>, <code>exports/*.zip</code>).</li>
+            <li><strong>Contents:</strong> Generated provisional marksheet PDFs (<code>marksheets/*.pdf</code>) and exported Excel workbooks (<code>exports/*.xlsx</code>, <code>exports/*.zip</code>).</li>
             <li><strong>Access Protection:</strong> Stored outside public static web roots; accessible only via validated session IDs (<code>job_id</code> sanitization guards against path traversal).</li>
           </ul>
 
@@ -852,7 +1159,7 @@
     </section>
 
 
-    <!-- 11. VIEW: COPYRIGHT / TAKEDOWN POLICY -->
+    <!-- 13. VIEW: COPYRIGHT / TAKEDOWN POLICY -->
     <section class="page-view" id="view-copyright">
       <div class="content-card">
         <div class="content-header">
@@ -882,14 +1189,14 @@
           </ol>
 
           <p>
-            Send takedown notices directly to: <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span>. SkillSum Innovations will promptly review and take appropriate action, including connector adjustments or repository updates.
+            Send takedown notices directly to: <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span>. SkillSum Innovations will promptly review and take appropriate action.
           </p>
         </div>
       </div>
     </section>
 
 
-    <!-- 12. VIEW: CONTACT & SUPPORT -->
+    <!-- 14. VIEW: CONTACT & SUPPORT -->
     <section class="page-view" id="view-contact">
       <div class="content-card">
         <div class="content-header">
@@ -902,13 +1209,12 @@
           </p>
 
           <h2>General Inquiries & Community Support</h2>
-          <p>
-            Because this is a completely free, open-source project without subscription fees or commercial ticketing staff:
-          </p>
           <ul>
+            <li><strong>Company:</strong> SkillSum Innovations</li>
+            <li><strong>Founder:</strong> Aditya Rajak</li>
+            <li><strong>Official Website:</strong> <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer">https://skillsum.in/</a></li>
             <li><strong>Official Support Contact:</strong> <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span></li>
-            <li><strong>Bug Reports & Feature Requests:</strong> Please submit issues or connector requests via our open-source code repository issue tracker.</li>
-            <li><strong>Contributing Connectors:</strong> Developers can submit pull requests to add new institutional connectors.</li>
+            <li><strong>Code Repository:</strong> <a href="https://github.com/Alex0775edu/skillsum_resultsetu" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
           </ul>
 
           <div class="callout-box">
@@ -919,7 +1225,7 @@
     </section>
 
 
-    <!-- 13. VIEW: OPEN SOURCE / MIT LICENSE -->
+    <!-- 15. VIEW: OPEN SOURCE / MIT LICENSE -->
     <section class="page-view" id="view-license">
       <div class="content-card">
         <div class="content-header">
@@ -933,7 +1239,8 @@
 
           <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 1.5rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.85rem; line-height: 1.6; margin: 1.5rem 0;">
             MIT License<br><br>
-            Copyright (c) 2026 SkillSum Innovations & Open Source Contributors<br><br>
+            Copyright (c) 2026 SkillSum Innovations & Open Source Contributors<br>
+            Founder: Aditya Rajak<br><br>
             Permission is hereby granted, free of charge, to any person obtaining a copy
             of this software and associated documentation files (the "Software"), to deal
             in the Software without restriction, including without limitation the rights
@@ -960,6 +1267,20 @@
 
   </main>
 
+  <!-- Pre-Footer Tasteful Promotional Banner -->
+  <div style="max-width: 1180px; margin: 0 auto; padding: 0 1rem;">
+    <div class="prefooter-promo-bar">
+      <div class="prefooter-promo-text" data-i18n="promo_footer_banner">
+        Need custom web, software or IoT systems for your organization? Partner with <strong>SkillSum Innovations</strong>.
+      </div>
+      <div>
+        <a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+          Visit skillsum.in ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Transparent Processing Consent Modal -->
   <div id="consentModal" class="modal-overlay" style="display: none;">
     <div class="modal-box">
@@ -982,29 +1303,40 @@
     </div>
   </div>
 
-  <!-- Responsive Footer with Comprehensive Links -->
+  <!-- Complete Professional 4-Column Footer -->
   <footer>
     <div class="footer-container">
+      <!-- 1. Brand Section -->
       <div class="footer-col">
-        <h4 class="brand-text-name">SkillSum ResultSetu</h4>
-        <p style="margin-bottom: 0.75rem;">
-          An independent, free and open-source bulk academic marksheet processing utility by <strong>SkillSum Innovations</strong>.
+        <div class="footer-brand-title brand-text-name">SkillSum ResultSetu</div>
+        <p style="margin-bottom: 0.65rem; line-height: 1.5;">
+          An independent, free, and open-source bulk academic marksheet processing utility by <strong>SkillSum Innovations</strong>.
         </p>
-        <span class="badge badge-success">MIT Licensed</span>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.65rem;">
+          <em>"Simplify bulk academic result processing."</em>
+        </p>
+        <div class="footer-founder-badge">
+          Founder: Aditya Rajak
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <span class="badge badge-success">MIT Licensed</span>
+        </div>
       </div>
 
+      <!-- 2. Product Navigation -->
       <div class="footer-col">
-        <h4>Navigation</h4>
+        <h4>Product Navigation</h4>
         <ul>
           <li><a href="#home" data-nav="home">Home</a></li>
           <li><a href="#process" data-nav="process">Process Results</a></li>
-          <li><a href="#how-it-works" data-nav="how-it-works">How It Works</a></li>
           <li><a href="#universities" data-nav="universities">Supported Universities</a></li>
+          <li><a href="#guide" data-nav="guide">User Guide</a></li>
           <li><a href="#faq" data-nav="faq">FAQ</a></li>
           <li><a href="#history" data-nav="history">Local History</a></li>
         </ul>
       </div>
 
+      <!-- 3. Legal & Policy -->
       <div class="footer-col">
         <h4>Legal & Policy</h4>
         <ul>
@@ -1013,14 +1345,18 @@
           <li><a href="#disclaimer" data-nav="disclaimer">Legal Disclaimer</a></li>
           <li><a href="#data-handling" data-nav="data-handling">Data Retention</a></li>
           <li><a href="#copyright" data-nav="copyright">Copyright Policy</a></li>
+          <li><a href="#license" data-nav="license">MIT License</a></li>
         </ul>
       </div>
 
+      <!-- 4. Company & Support -->
       <div class="footer-col">
-        <h4>Support & Project</h4>
+        <h4>Company & Support</h4>
         <ul>
+          <li><a href="#about" data-nav="about">About SkillSum Innovations</a></li>
+          <li><span style="color: var(--text-main); font-weight: 600;">Founder:</span> Aditya Rajak</li>
+          <li><a href="https://skillsum.in/" target="_blank" rel="noopener noreferrer">SkillSum Website ↗</a></li>
           <li><a href="#contact" data-nav="contact">Contact & Support</a></li>
-          <li><a href="#license" data-nav="license">MIT License</a></li>
           <li><a href="/api/download/sample-template">Excel Template (.xlsx)</a></li>
         </ul>
       </div>
@@ -1028,7 +1364,7 @@
 
     <div class="footer-bottom">
       <div>
-        &copy; 2026 SkillSum Innovations &bull; No login, accounts, tracking, or fees.
+        Independent project by <strong>SkillSum Innovations</strong> &bull; Developed by SkillSum Innovations &bull; Founded by Aditya Rajak &bull; &copy; <span id="footerYear">2026</span> SkillSum Innovations. All rights reserved.
       </div>
       <div>
         <a href="#privacy" data-nav="privacy" style="color: var(--text-muted); text-decoration: none;">Privacy</a> &bull; 

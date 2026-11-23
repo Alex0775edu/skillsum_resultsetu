@@ -19,25 +19,25 @@ from engine.analytics import AcademicAnalytics
 class ResultExporter:
     """Exports processing results to Excel, PDF, and ZIP formats."""
 
-    # Deep green & neutral color palette
-    HEADER_FILL = PatternFill(start_color="14532D", end_color="14532D", fill_type="solid")
-    SUB_HEADER_FILL = PatternFill(start_color="166534", end_color="166534", fill_type="solid")
-    ACCENT_FILL = PatternFill(start_color="F5F5F4", end_color="F5F5F4", fill_type="solid")
-    PASS_FILL = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
-    FAIL_FILL = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
-    WARN_FILL = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    # Professional Brown + Cream palette
+    HEADER_FILL = PatternFill(start_color="3E2723", end_color="3E2723", fill_type="solid")
+    SUB_HEADER_FILL = PatternFill(start_color="654321", end_color="654321", fill_type="solid")
+    ACCENT_FILL = PatternFill(start_color="F8F1E5", end_color="F8F1E5", fill_type="solid")
+    PASS_FILL = PatternFill(start_color="E8F5E9", end_color="E8F5E9", fill_type="solid")
+    FAIL_FILL = PatternFill(start_color="FFEBEE", end_color="FFEBEE", fill_type="solid")
+    WARN_FILL = PatternFill(start_color="FFF8E1", end_color="FFF8E1", fill_type="solid")
 
     FONT_HEADER = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-    FONT_BOLD = Font(name="Calibri", size=11, bold=True)
-    FONT_REGULAR = Font(name="Calibri", size=11)
-    FONT_PASS = Font(name="Calibri", size=11, bold=True, color="14532D")
-    FONT_FAIL = Font(name="Calibri", size=11, bold=True, color="991B1B")
+    FONT_BOLD = Font(name="Calibri", size=11, bold=True, color="30251F")
+    FONT_REGULAR = Font(name="Calibri", size=11, color="30251F")
+    FONT_PASS = Font(name="Calibri", size=11, bold=True, color="2E7D32")
+    FONT_FAIL = Font(name="Calibri", size=11, bold=True, color="C62828")
 
     THIN_BORDER = Border(
-        left=Side(style='thin', color="E7E5E4"),
-        right=Side(style='thin', color="E7E5E4"),
-        top=Side(style='thin', color="E7E5E4"),
-        bottom=Side(style='thin', color="E7E5E4")
+        left=Side(style='thin', color="E8DCCB"),
+        right=Side(style='thin', color="E8DCCB"),
+        top=Side(style='thin', color="E8DCCB"),
+        bottom=Side(style='thin', color="E8DCCB")
     )
 
     @classmethod
@@ -493,7 +493,7 @@ class ResultExporter:
                 fontSize=17,
                 leading=21,
                 alignment=1,
-                textColor=colors.HexColor("#14532D")
+                textColor=colors.HexColor("#3E2723")
             )
             sub_style = ParagraphStyle(
                 'DocSub',
@@ -501,7 +501,7 @@ class ResultExporter:
                 fontSize=9,
                 leading=12,
                 alignment=1,
-                textColor=colors.HexColor("#78716C")
+                textColor=colors.HexColor("#75685E")
             )
             disclaimer_style = ParagraphStyle(
                 'DocDisclaimer',
@@ -514,7 +514,8 @@ class ResultExporter:
 
             elements.append(Paragraph("<b>SKILLSUM RESULTSETU &bull; ACADEMIC REPORT</b>", title_style))
             elements.append(Paragraph("PROVISIONAL PERFORMANCE SUMMARY (NOT AN OFFICIAL UNIVERSITY MARKSHEET)", disclaimer_style))
-            elements.append(Spacer(1, 12))
+            elements.append(Paragraph("<font size=7 color='#75685E'>Developed by SkillSum Innovations &bull; Founded by Aditya Rajak</font>", sub_style))
+            elements.append(Spacer(1, 10))
 
             # Student Metadata Table
             meta_data = [
@@ -554,14 +555,14 @@ class ResultExporter:
                     ])
                 stbl = Table(rows, colWidths=[50, 180, 45, 45, 45, 45, 45, 55, 45])
                 stbl.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#166534")),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#654321")),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                     ('ALIGN', (1, 1), (1, -1), 'LEFT'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, -1), 8),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E7E5E4")),
-                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#FAFAF9")]),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E8DCCB")),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor("#FFF9F0")]),
                 ]))
                 elements.append(stbl)
                 elements.append(Spacer(1, 12))
@@ -579,8 +580,8 @@ class ResultExporter:
             sum_table = Table(summary_data, colWidths=[180, 360])
             sum_table.setStyle(TableStyle([
                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
-                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F5F5F4")),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E7E5E4")),
+                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F8F1E5")),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#E8DCCB")),
                 ('PADDING', (0, 0), (-1, -1), 5),
             ]))
             elements.append(sum_table)

@@ -263,6 +263,8 @@ class TestResultProcessor(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json()["config"]
         self.assertEqual(data["owner_name"], "SkillSum Innovations")
+        self.assertEqual(data["founder_name"], "Aditya Rajak")
+        self.assertEqual(data["company_url"], "https://skillsum.in/")
         self.assertEqual(data["project_name"], "SkillSum ResultSetu")
         self.assertEqual(data["project_slug"], "skillsum-resultsetu")
         self.assertEqual(data["support_email"], "[SUPPORT_EMAIL_PLACEHOLDER]")

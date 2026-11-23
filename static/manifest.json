@@ -4,8 +4,8 @@
   "description": "Simplify bulk academic result processing. Independent, free, open-source utility by SkillSum Innovations.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbfbf9",
-  "theme_color": "#14532d",
+  "background_color": "#F8F1E5",
+  "theme_color": "#654321",
   "icons": [
     {
       "src": "/static/icons/icon-192.png",

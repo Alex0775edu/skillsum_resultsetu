@@ -2,27 +2,33 @@
 
 > **Simplify bulk academic result processing.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-saddlebrown.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal.svg)](https://fastapi.tiangolo.com)
+[![Design: Brown & Cream](https://img.shields.io/badge/Design-Brown%20%26%20Cream-654321.svg)]()
 [![Status: Production Ready](https://img.shields.io/badge/Status-Production%20Ready-success.svg)]()
 
-**SkillSum ResultSetu** is an independent, free, and open-source academic result processing and marksheet extraction platform developed by **SkillSum Innovations**. It converts tedious manual marksheet queries into an automated bulk extraction pipeline for colleges, polytechnics, department heads, and educational administrators.
+**SkillSum ResultSetu** is an independent, free, and open-source academic result processing platform developed by **SkillSum Innovations**, founded by **Aditya Rajak**. It converts tedious manual marksheet queries into an automated bulk extraction pipeline for colleges, polytechnics, department heads, and educational administrators.
+
+Official Website: [https://skillsum.in/](https://skillsum.in/)
 
 ---
 
 ## 🌟 Key Highlights
 
 - **100% Free & Open Source**: MIT Licensed with no subscriptions, paid APIs, user registration, accounts, or payment gates.
+- **Dual Branding**: Developed by **SkillSum Innovations**, founded by **Aditya Rajak**.
+- **Brown & Cream Design System**: Clean, premium, accessible visual identity (`#654321` Primary Brown, `#3E2723` Dark Brown, `#F8F1E5` Cream).
+- **Dedicated 8-Step User Guide**: Complete workflow guide with troubleshooting and interactive FAQs for students and faculty.
 - **Privacy-First Architecture**: Excel student spreadsheets are parsed locally inside the client browser. No persistent database of student records is maintained.
 - **Pluggable Connector Architecture**: Modular adapter pattern allowing custom university portals (e.g., BTEUP, standard semester portals) to be connected cleanly without altering the core engine.
 - **Comprehensive Dynamic Exports**:
-  - **Consolidated Master Excel (`.xlsx`)**: Formatted master spreadsheet with student details, evaluated subjects, and dynamic totals.
+  - **Consolidated Master Excel (`.xlsx`)**: Formatted master spreadsheet with student details, evaluated subjects, competition rankings (tied 1224), and cohort statistics.
   - **Subject-Wise Excel (`.xlsx`)**: Dedicated workbook tabs per subject displaying Theory, Practical, and Sessional components.
   - **Marksheets Archive (`.zip`)**: Compressed bundle of all downloaded student marksheet PDFs.
   - **Complete Package (`.zip`)**: Consolidated Excel, Subject-wise sheets, marksheets folder, and summary report.
-- **Real-Time Progress & Retry**: Live progress bar, counters, privacy-masked terminal logs, and single-click retry for failed queries.
-- **Security & Integrity**: Built-in SSRF guards, path traversal sanitizers, 5MB upload size limits, and a 30-minute automated Time-To-Live (TTL) temporary file purge.
+- **Real-Time Progress & Retry**: Live progress bar, counters, privacy-masked terminal logs, safe job cancellation, and single-click retry for failed queries.
+- **Security & Integrity**: Formula injection sanitization (CWE-1236), built-in SSRF guards, path traversal sanitizers, 5MB upload size limits, and a 30-minute automated Time-To-Live (TTL) temporary file purge.
 
 ---
 
@@ -36,15 +42,20 @@ skillsum-resultsetu/
 │   ├── demo_connector.py    # Reference demo college connector
 │   └── registry.py          # Portal registry & SSRF-protected URL matching
 ├── engine/                  # Core processing engine
+│   ├── analytics.py         # Academic rankings (1224), statistics, ResultVerifier
 │   ├── excel_parser.py      # Column auto-detect (.xlsx/.xls) & deduplication
-│   ├── exporter.py          # Dynamic OpenPyXL & zipfile exporters
-│   ├── processor.py         # Threaded worker with 30-min TTL cleaner
+│   ├── exporter.py          # Dynamic OpenPyXL & zipfile exporters (Formula-safe)
+│   ├── processor.py         # Threaded worker with 30-min TTL cleaner & cancel
 │   └── security.py          # SSRF protection, path traversal sanitization
-├── static/                  # Responsive web frontend (Deep Green / Light Green)
-│   ├── css/style.css        # Responsive, accessible mobile-first styling
+├── static/                  # Responsive web frontend (Brown & Cream Theme)
+│   ├── css/style.css        # Responsive, accessible Brown & Cream design system
 │   ├── js/app.js            # SPA routing & real-time live streaming
+│   ├── js/translations.js   # Complete English & Hindi (हिन्दी) translations
 │   ├── js/vendor/           # Self-contained offline client parsing (xlsx.full.min.js)
-│   └── index.html           # 12 integrated pages & SVG brand mark
+│   ├── manifest.json        # PWA application manifest
+│   ├── sw.js                # Privacy-preserving Service Worker
+│   ├── logo.webp            # SkillSum official brand logo
+│   └── index.html           # 15 integrated views including User Guide & About
 ├── app.py                   # FastAPI web application server
 ├── brand_config.py          # Centralized branding & configuration module
 ├── result.py                # Preserved CLI runner
@@ -54,7 +65,7 @@ skillsum-resultsetu/
 ├── vercel.json              # Vercel deployment configuration
 ├── .gitignore               # Git ignore configuration
 ├── LICENSE                  # MIT License
-└── test_suite.py            # Comprehensive automated test suite
+└── test_suite.py            # Comprehensive automated test suite (13/13 passing)
 ```
 
 ---

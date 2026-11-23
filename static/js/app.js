@@ -162,8 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function navigateTo(targetViewId) {
     const validViews = [
       "home", "process", "history", "how-it-works", "universities",
-      "faq", "privacy", "terms", "disclaimer", "data-handling",
-      "copyright", "contact", "license"
+      "guide", "about", "faq", "privacy", "terms", "disclaimer",
+      "data-handling", "copyright", "contact", "license"
     ];
 
     const cleanTarget = validViews.includes(targetViewId) ? targetViewId : "home";
@@ -216,6 +216,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const initialHash = window.location.hash.replace("#", "") || "home";
   navigateTo(initialHash);
+
+  // Dynamic Footer Year
+  const footerYear = document.getElementById("footerYear");
+  if (footerYear) {
+    footerYear.textContent = new Date().getFullYear();
+  }
+
+  // FAQ Accordion Click Handler
+  document.addEventListener("click", e => {
+    const question = e.target.closest(".faq-question");
+    if (question) {
+      const item = question.closest(".faq-item");
+      if (item) {
+        item.classList.toggle("open");
+      }
+    }
+  });
 
 
   // --- 4. Central Branding Configuration ---

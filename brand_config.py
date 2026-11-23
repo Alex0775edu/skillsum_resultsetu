@@ -11,6 +11,8 @@ PROJECT_SHORT_NAME = "ResultSetu"
 PROJECT_SLUG = "skillsum-resultsetu"
 TAGLINE = "Simplify bulk academic result processing."
 OWNER_NAME = "SkillSum Innovations"
+FOUNDER_NAME = "Aditya Rajak"
+COMPANY_URL = "https://skillsum.in/"
 POSITIONING = "An independent, free and open-source academic result processing utility."
 LICENSE_NAME = "MIT License"
 SUPPORT_EMAIL = "[SUPPORT_EMAIL_PLACEHOLDER]"  # Clearly marked placeholder as instructed
@@ -32,6 +34,8 @@ def get_branding_context() -> Dict[str, Any]:
         "project_slug": PROJECT_SLUG,
         "tagline": TAGLINE,
         "owner_name": OWNER_NAME,
+        "founder_name": FOUNDER_NAME,
+        "company_url": COMPANY_URL,
         "positioning": POSITIONING,
         "license_name": LICENSE_NAME,
         "support_email": SUPPORT_EMAIL,
