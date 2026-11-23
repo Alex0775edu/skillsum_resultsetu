@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Bulk Result Processing App</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">R</div>
+        <div>
+          <div class="brand-title">Universal Bulk Result Processor</div>
+          <div class="brand-subtitle">Automated academic marksheet extraction & dynamic reporting engine</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge-open">Free & Open Source (MIT)</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- STEP 1: Portal URL & Connector -->
+    <section class="step-card active" id="step1-card">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-title">Select Result Website</div>
+        <div class="step-desc">Enter college or university examination portal URL</div>
+      </div>
+
+      <div class="form-group">
+        <label for="portalUrl">Result Portal URL</label>
+        <div class="input-with-button">
+          <input
+            type="url"
+            id="portalUrl"
+            placeholder="https://result.bteexam.com/even/main/rollno.aspx"
+            value="https://result.bteexam.com/even/main/rollno.aspx"
+          />
+          <button class="btn btn-primary" id="btnValidateUrl">Validate Portal</button>
+        </div>
+        
+        <div class="quick-links">
+          <span class="quick-links-title">Quick Select:</span>
+          <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx">BTEUP Official Portal</button>
+          <button class="btn-pill" data-url="https://results.university.edu/semester/exam">Standard University (Demo & Offline Testing)</button>
+        </div>
+      </div>
+
+      <!-- Portal Status Feedback -->
+      <div id="portalStatusBox" class="portal-status-box matched" style="display: none;">
+        <div id="portalStatusIcon">✓</div>
+        <div id="portalStatusText">
+          <strong>BTEUP Connector Matched:</strong> Board of Technical Education Uttar Pradesh. Required fields: Enrollment Number, Date of Birth.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: Excel Upload & Mapping -->
+    <section class="step-card" id="step2-card">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-title">Upload Student List (Excel)</div>
+        <div class="step-desc">Support .xlsx and .xls formats</div>
+      </div>
+
+      <div class="upload-dropzone" id="dropzone">
+        <div class="upload-icon">📄</div>
+        <div class="upload-text">Drag & drop your Excel file here, or click to browse</div>
+        <div class="upload-hint">Supports .xlsx and .xls files with student roll numbers / enrollments</div>
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
+      </div>
+
+      <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Need a format template?</span>
+        <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download>
+          ⬇ Download Sample Excel Template
+        </a>
+      </div>
+
+      <!-- Upload Analysis & Mapping Panel -->
+      <div id="uploadAnalysisPanel" style="display: none; margin-top: 1.25rem;">
+        
+        <!-- Summary Chips -->
+        <div class="upload-summary-grid">
+          <div class="stat-chip">
+            <div class="stat-chip-label">Total Rows</div>
+            <div class="stat-chip-val" id="statTotalRows">0</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-chip-label">Valid Records</div>
+            <div class="stat-chip-val" id="statValidRows" style="color: var(--success);">0</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-chip-label">Duplicate Rows</div>
+            <div class="stat-chip-val" id="statDuplicateRows" style="color: var(--danger);">0</div>
+          </div>
+          <div class="stat-chip">
+            <div class="stat-chip-label">Empty Rows</div>
+            <div class="stat-chip-val" id="statEmptyRows" style="color: var(--warning);">0</div>
+          </div>
+        </div>
+
+        <!-- Manual Column Mapping Fallback -->
+        <div style="margin: 1rem 0 0.5rem 0;">
+          <label style="font-size: 0.9rem; font-weight: 600;">Confirm or Map Excel Columns:</label>
+        </div>
+        <div class="mapping-grid">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="mapEnrollment">Enrollment / Roll No Column *</label>
+            <select id="mapEnrollment"></select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="mapDob">Date of Birth (DOB) Column</label>
+            <select id="mapDob"></select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="mapName">Student Name Column</label>
+            <select id="mapName"></select>
+          </div>
+        </div>
+
+        <!-- Preview Table -->
+        <div style="margin: 1rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">First 10 Student Records Preview:</span>
+          <span id="previewNotice" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+        </div>
+        <div class="table-container">
+          <table id="previewTable">
+            <thead>
+              <tr id="previewTableHead"></tr>
+            </thead>
+            <tbody id="previewTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- STEP 3: Extraction Options -->
+    <section class="step-card" id="step3-card">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-title">Configure Extraction Options</div>
+        <div class="step-desc">Select desired data fields and export artifacts</div>
+      </div>
+
+      <div class="options-grid">
+        <label class="option-card">
+          <input type="checkbox" id="optAllSubjects" checked />
+          <span class="option-label">All Subjects</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optTheory" checked />
+          <span class="option-label">Theory Marks</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optPractical" checked />
+          <span class="option-label">Practical Marks</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optInternal" checked />
+          <span class="option-label">Internal / Sessional Marks</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optSubjectPct" checked />
+          <span class="option-label">Subject-wise Percentages</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optTotals" checked />
+          <span class="option-label">Total Marks (Obtained / Max)</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optPercentage" checked />
+          <span class="option-label">Overall Percentage (%)</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optStatus" checked />
+          <span class="option-label">Pass / Fail Status</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optPdf" checked />
+          <span class="option-label">Complete Marksheet PDF</span>
+        </label>
+        <label class="option-card">
+          <input type="checkbox" id="optForceDownload" />
+          <span class="option-label">Force Re-download (Bypass Cache)</span>
+        </label>
+      </div>
+
+      <div style="margin-top: 1.25rem;">
+        <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;">
+          ▶ Start Bulk Processing
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: Bulk Processing & Live Progress -->
+    <section class="progress-card" id="step4-card" style="display: none;">
+      <div class="progress-header">
+        <div>
+          <span style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Processing Students</span>
+          <span id="currentStatusBadge" class="badge badge-info" style="margin-left: 0.5rem;">Running</span>
+        </div>
+        <div style="font-size: 0.95rem; font-weight: 600;" id="progressPercentage">0%</div>
+      </div>
+
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+
+      <!-- Real-time Counters -->
+      <div class="metrics-cards">
+        <div class="metric-box total">
+          <div class="metric-title">Total</div>
+          <div class="metric-number" id="metricTotal">0</div>
+        </div>
+        <div class="metric-box success">
+          <div class="metric-title">Success</div>
+          <div class="metric-number" id="metricSuccess">0</div>
+        </div>
+        <div class="metric-box failed">
+          <div class="metric-title">Failed</div>
+          <div class="metric-number" id="metricFailed">0</div>
+        </div>
+        <div class="metric-box skipped">
+          <div class="metric-title">Skipped</div>
+          <div class="metric-number" id="metricSkipped">0</div>
+        </div>
+      </div>
+
+      <!-- Real-time Log Feed -->
+      <div class="terminal-box" id="logTerminal">
+        <div>[System] Initializing processing task...</div>
+      </div>
+
+      <!-- Live Results Stream Table -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <span style="font-weight: 600; font-size: 0.9rem;">Live Result Stream:</span>
+        <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;">
+          🔄 Retry All Failed
+        </button>
+      </div>
+      <div class="table-container" style="max-height: 340px; overflow-y: auto;">
+        <table id="liveResultsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Enrollment</th>
+              <th>Student Name</th>
+              <th>Total Marks</th>
+              <th>Percentage</th>
+              <th>Result</th>
+              <th>Status</th>
+              <th>Marksheet</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="liveResultsBody">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- STEP 5: Export Results -->
+    <section class="step-card" id="step5-card" style="display: none;">
+      <div class="step-header">
+        <div class="step-number" style="background: var(--success);">5</div>
+        <div class="step-title">Export & Download Results</div>
+        <div class="step-desc">All files generated with dynamic formulas & preserved original data</div>
+      </div>
+
+      <div class="export-grid">
+        <div class="export-card">
+          <div>
+            <div class="export-card-title">📊 Consolidated Excel</div>
+            <div class="export-card-desc">Master spreadsheet containing all student records, totals, and percentages.</div>
+          </div>
+          <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank">Download Excel (.xlsx)</a>
+        </div>
+
+        <div class="export-card">
+          <div>
+            <div class="export-card-title">📑 Subject-Wise Sheets</div>
+            <div class="export-card-desc">Individual worksheet tab for each subject showing Theory, Practical & Sessional.</div>
+          </div>
+          <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank">Download Subject Excel</a>
+        </div>
+
+        <div class="export-card">
+          <div>
+            <div class="export-card-title">📂 Marksheets Archive</div>
+            <div class="export-card-desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
+          </div>
+          <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank">Download Marksheets (.zip)</a>
+        </div>
+
+        <div class="export-card" style="border-color: #93c5fd; background: #f0f7ff;">
+          <div>
+            <div class="export-card-title">📦 Complete Package</div>
+            <div class="export-card-desc">Complete bundle including Consolidated Excel, Subject Sheets, PDFs & Report.</div>
+          </div>
+          <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank">Download Full Package (.zip)</a>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; text-align: right;">
+        <button class="btn btn-secondary" id="btnResetApp">Start New Batch</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com" target="_blank">Open Source Repository</a>
+      <a href="/api/download/sample-template">Sample Excel Template</a>
+      <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>
+    </div>
+    <div>Universal Bulk Result Processing Engine &bull; Completely Free &bull; No User Accounts or Subscriptions</div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

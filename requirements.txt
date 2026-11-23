@@ -1,0 +1,11 @@
+fastapi>=0.100.0
+uvicorn>=0.22.0
+python-multipart>=0.0.6
+pandas>=2.0.0
+openpyxl>=3.1.0
+selenium>=4.10.0
+pymupdf>=1.23.0
+reportlab>=4.0.0
+pytesseract>=0.3.10
+Pillow>=9.0.0
+requests>=2.31.0
