@@ -1,23 +1,33 @@
-// Universal Bulk SkillSum ResultSetu - SkillSum Innovations
-// Privacy-First Browser-Local Parsing & Responsive Multi-Page Navigation
+// SkillSum ResultSetu - Frontend Controller
+// Supports Bilingual Interface (EN/HI), PWA Offline Shell, Local History,
+// Client-Side Excel Validation, and Transparent Processing Consent.
 
 document.addEventListener("DOMContentLoaded", () => {
-  // State variables
+  // Application State
+  let currentLanguage = localStorage.getItem("app_lang") || "en";
   let currentConnectorId = "bteup";
   let currentJobId = null;
   let pollInterval = null;
-  let clientParsedStudents = null; // Stored in browser memory
-  let serverUploadId = null;        // Fallback upload ID
+  let clientParsedStudents = null;
+  let serverUploadId = null;
   let brandConfig = {};
 
-  // DOM Elements - Navigation & Shell
+  // History storage key
+  const HISTORY_STORAGE_KEY = "skillsum_resultsetu_history";
+
+  // DOM Elements - Navigation & Views
   const navLinks = document.querySelectorAll(".nav-link[data-nav]");
   const allNavTriggers = document.querySelectorAll("[data-nav]");
   const pageViews = document.querySelectorAll(".page-view");
   const mobileNavToggle = document.getElementById("mobileNavToggle");
   const navLinksContainer = document.getElementById("navLinks");
+  const offlineBanner = document.getElementById("offlineBanner");
 
-  // DOM Elements - Process Page Workflow
+  // Language Switcher Buttons
+  const btnLangEn = document.getElementById("btnLangEn");
+  const btnLangHi = document.getElementById("btnLangHi");
+
+  // Process Workflow Elements
   const portalUrlInput = document.getElementById("portalUrl");
   const btnValidateUrl = document.getElementById("btnValidateUrl");
   const portalStatusBox = document.getElementById("portalStatusBox");
@@ -48,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressBar = document.getElementById("progressBar");
   const progressPercentage = document.getElementById("progressPercentage");
   const currentStatusBadge = document.getElementById("currentStatusBadge");
+  const btnCancelProcess = document.getElementById("btnCancelProcess");
 
   const metricTotal = document.getElementById("metricTotal");
   const metricSuccess = document.getElementById("metricSuccess");
@@ -64,6 +75,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDownloadMarksheetsZip = document.getElementById("btnDownloadMarksheetsZip");
   const btnDownloadCompleteZip = document.getElementById("btnDownloadCompleteZip");
   const btnResetApp = document.getElementById("btnResetApp");
+
+  // Consent Modal Elements
+  const consentModal = document.getElementById("consentModal");
+  const btnConsentCancel = document.getElementById("btnConsentCancel");
+  const btnConsentConfirm = document.getElementById("btnConsentConfirm");
+
+  // History Elements
+  const historyTableBody = document.getElementById("historyTableBody");
+  const btnClearHistory = document.getElementById("btnClearHistory");
 
   // Column synonyms for client-side auto-detection
   const COLUMN_SYNONYMS = {
@@ -87,17 +107,67 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
-  // --- 1. Client-Side Page Router ---
+  // --- 1. Bilingual Localization (EN / HI) ---
+  function setLanguage(lang) {
+    currentLanguage = lang === "hi" ? "hi" : "en";
+    localStorage.setItem("app_lang", currentLanguage);
+
+    if (btnLangEn && btnLangHi) {
+      if (currentLanguage === "hi") {
+        btnLangHi.classList.add("active");
+        btnLangEn.classList.remove("active");
+      } else {
+        btnLangEn.classList.add("active");
+        btnLangHi.classList.remove("active");
+      }
+    }
+
+    const dict = (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[currentLanguage])
+      ? TRANSLATIONS[currentLanguage]
+      : (typeof TRANSLATIONS !== "undefined" ? TRANSLATIONS.en : {});
+
+    // Update all elements with data-i18n
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (dict[key]) {
+        el.innerHTML = dict[key];
+      }
+    });
+
+    renderHistory();
+  }
+
+  if (btnLangEn) btnLangEn.addEventListener("click", () => setLanguage("en"));
+  if (btnLangHi) btnLangHi.addEventListener("click", () => setLanguage("hi"));
+
+
+  // --- 2. PWA Registration & Offline Detection ---
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/sw.js").catch(err => {
+      console.warn("ServiceWorker registration notice:", err);
+    });
+  }
+
+  function updateNetworkStatus() {
+    if (offlineBanner) {
+      offlineBanner.style.display = navigator.onLine ? "none" : "block";
+    }
+  }
+  window.addEventListener("online", updateNetworkStatus);
+  window.addEventListener("offline", updateNetworkStatus);
+  updateNetworkStatus();
+
+
+  // --- 3. Client-Side Page Router ---
   function navigateTo(targetViewId) {
     const validViews = [
-      "home", "process", "how-it-works", "universities",
+      "home", "process", "history", "how-it-works", "universities",
       "faq", "privacy", "terms", "disclaimer", "data-handling",
       "copyright", "contact", "license"
     ];
 
     const cleanTarget = validViews.includes(targetViewId) ? targetViewId : "home";
 
-    // Toggle active view
     pageViews.forEach(view => {
       if (view.id === `view-${cleanTarget}`) {
         view.classList.add("active");
@@ -106,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Update nav links active state
     navLinks.forEach(link => {
       if (link.getAttribute("data-nav") === cleanTarget) {
         link.classList.add("active");
@@ -115,12 +184,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Close mobile nav if open
-    navLinksContainer.classList.remove("open");
+    if (cleanTarget === "history") {
+      renderHistory();
+    }
+
+    if (navLinksContainer) navLinksContainer.classList.remove("open");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Bind click handlers to all navigation triggers
   allNavTriggers.forEach(el => {
     el.addEventListener("click", e => {
       const target = el.getAttribute("data-nav");
@@ -137,24 +208,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hash) navigateTo(hash);
   });
 
-  mobileNavToggle.addEventListener("click", () => {
-    navLinksContainer.classList.toggle("open");
-  });
+  if (mobileNavToggle) {
+    mobileNavToggle.addEventListener("click", () => {
+      navLinksContainer.classList.toggle("open");
+    });
+  }
 
-  // Read initial hash on load
   const initialHash = window.location.hash.replace("#", "") || "home";
   navigateTo(initialHash);
 
 
-  // --- 2. Load Central Branding Configuration ---
+  // --- 4. Central Branding Configuration ---
   async function loadBrandingConfig() {
     try {
       const res = await fetch("/api/config");
       const data = await res.json();
       if (data.success && data.config) {
         brandConfig = data.config;
-
-        // Populate branding text across all pages
         document.querySelectorAll(".brand-text-name").forEach(el => {
           el.textContent = brandConfig.project_name || "SkillSum ResultSetu";
         });
@@ -166,13 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     } catch (e) {
-      console.warn("Notice: Using local default branding settings.");
+      console.warn("Using local configuration.");
     }
   }
   loadBrandingConfig();
+  setLanguage(currentLanguage);
 
 
-  // --- 3. Portal Validation ---
+  // --- 5. Portal URL Validation ---
   validatePortalUrl(portalUrlInput.value);
 
   document.querySelectorAll(".btn-pill").forEach(pill => {
@@ -182,9 +253,11 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  btnValidateUrl.addEventListener("click", () => {
-    validatePortalUrl(portalUrlInput.value);
-  });
+  if (btnValidateUrl) {
+    btnValidateUrl.addEventListener("click", () => {
+      validatePortalUrl(portalUrlInput.value);
+    });
+  }
 
   async function validatePortalUrl(url) {
     if (!url || !url.trim()) return;
@@ -213,12 +286,12 @@ document.addEventListener("DOMContentLoaded", () => {
         portalStatusText.innerHTML = `<strong>Unsupported Portal:</strong> ${data.message.replace(/\n/g, '<br/>')}`;
       }
     } catch (err) {
-      console.error("Portal validation error:", err);
+      console.error("Portal validation notice:", err);
     }
   }
 
 
-  // --- 4. Privacy-First Browser-Local Excel Parsing ---
+  // --- 6. Privacy-First Client-Side Excel Parsing & Validation ---
   dropzone.addEventListener("click", () => fileInput.click());
 
   ["dragenter", "dragover"].forEach(evt => {
@@ -253,7 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     dropzone.innerHTML = `<div class="upload-text">Reading & validating <strong>${file.name}</strong> locally...</div>`;
 
-    // Attempt Privacy-First Client-Side Parsing
     if (window.XLSX) {
       try {
         const arrayBuffer = await file.arrayBuffer();
@@ -263,7 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rawJson = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
         if (!rawJson || rawJson.length === 0) {
-          throw new Error("Excel sheet contains no data rows.");
+          throw new Error("Excel spreadsheet contains no data rows.");
         }
 
         const columns = Object.keys(rawJson[0]);
@@ -283,16 +355,14 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // Store client parsed data
         clientParsedStudents = {
           filename: file.name,
           columns: columns,
           detectedMapping: detected,
           rows: rawJson
         };
-        serverUploadId = null; // Clear server upload ID
+        serverUploadId = null;
 
-        // Update statistics
         const enrollmentCol = detected.enrollment || columns[0];
         let emptyCount = 0;
         let dupCount = 0;
@@ -314,14 +384,12 @@ document.addEventListener("DOMContentLoaded", () => {
         statDuplicateRows.textContent = dupCount;
         statEmptyRows.textContent = emptyCount;
 
-        // Populate column dropdowns
         populateColumnSelect(mapEnrollment, columns, detected.enrollment, true);
         populateColumnSelect(mapDob, columns, detected.dob, false);
         populateColumnSelect(mapName, columns, detected.name, false);
 
-        // Render preview table
         renderPreviewTable(columns, rawJson.slice(0, 10));
-        previewNotice.textContent = `Showing first ${Math.min(10, rawJson.length)} rows (parsed 100% locally in browser)`;
+        previewNotice.textContent = `Showing first ${Math.min(10, rawJson.length)} rows (100% browser-local verification)`;
 
         dropzone.innerHTML = `
           <div class="upload-icon" style="color: var(--success);">✓</div>
@@ -334,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
 
       } catch (err) {
-        console.warn("Client-side Excel parsing fallback to server API:", err);
+        console.warn("Client parsing fallback to server API:", err);
       }
     }
 
@@ -434,8 +502,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // --- 5. Start Bulk Processing ---
-  btnStartBulk.addEventListener("click", async () => {
+  // --- 7. Transparent Processing Consent & Start ---
+  btnStartBulk.addEventListener("click", () => {
     if (!clientParsedStudents && !serverUploadId) {
       alert("Please upload a student Excel file in Step 2 before starting processing.");
       return;
@@ -451,6 +519,22 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Please provide a valid Result Portal URL in Step 1.");
       return;
     }
+
+    // Open Transparent Consent Modal before initiating queries
+    consentModal.style.display = "flex";
+  });
+
+  btnConsentCancel.addEventListener("click", () => {
+    consentModal.style.display = "none";
+  });
+
+  btnConsentConfirm.addEventListener("click", () => {
+    consentModal.style.display = "none";
+    executeBulkProcessing();
+  });
+
+  async function executeBulkProcessing() {
+    const portalUrl = portalUrlInput.value.trim();
 
     const options = {
       include_all_subjects: document.getElementById("optAllSubjects").checked,
@@ -471,19 +555,17 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       let res, data;
 
-      // Primary Privacy-First Path: Client-Side Parsed Data
       if (clientParsedStudents) {
         const enrCol = mapEnrollment.value;
         const dobCol = mapDob.value;
         const nameCol = mapName.value;
 
-        // Build clean student query payload with deduplication
         const studentPayload = [];
         const seenEnr = new Set();
 
         clientParsedStudents.rows.forEach(r => {
           let enrVal = String(r[enrCol] || "").trim();
-          if (enrVal.endsWith(".0")) enrVal = enrVal.slice(0, -2); // Handle Excel float conversions
+          if (enrVal.endsWith(".0")) enrVal = enrVal.slice(0, -2);
 
           if (!enrVal || seenEnr.has(enrVal)) return;
           seenEnr.add(enrVal);
@@ -522,7 +604,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
       } else {
-        // Fallback Server Upload Path
         res = await fetch("/api/process/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -547,23 +628,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
       currentJobId = data.job_id;
 
-      // Reveal Step 4 & scroll
       step4Card.style.display = "block";
       step4Card.scrollIntoView({ behavior: "smooth" });
 
-      startStatusPolling(currentJobId);
+      startStatusPolling(currentJobId, portalUrl);
 
     } catch (err) {
       alert("Processing error: " + err.message);
       btnStartBulk.disabled = false;
       btnStartBulk.textContent = "▶ Start Bulk Processing";
     }
-  });
+  }
 
 
-  // --- 6. Live Status Polling & Results Table ---
-  function startStatusPolling(jobId) {
+  // --- 8. Cancellation Support ---
+  if (btnCancelProcess) {
+    btnCancelProcess.addEventListener("click", async () => {
+      if (!currentJobId) return;
+      if (confirm("Are you sure you want to cancel the active processing session?")) {
+        btnCancelProcess.disabled = true;
+        btnCancelProcess.textContent = "Cancelling...";
+        try {
+          await fetch(`/api/process/cancel/${currentJobId}`, { method: "POST" });
+        } catch (e) {
+          console.error("Cancellation notice:", e);
+        }
+      }
+    });
+  }
+
+
+  // --- 9. Live Polling & Real-Time Stream ---
+  function startStatusPolling(jobId, portalUrl) {
     if (pollInterval) clearInterval(pollInterval);
+    if (btnCancelProcess) {
+      btnCancelProcess.disabled = false;
+      btnCancelProcess.textContent = "⏹ Cancel Processing";
+    }
 
     pollInterval = setInterval(async () => {
       try {
@@ -579,7 +680,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (job.status === "completed") {
           currentStatusBadge.className = "badge badge-success";
-        } else if (job.status === "failed") {
+        } else if (job.status === "failed" || job.status === "cancelled") {
           currentStatusBadge.className = "badge badge-fail";
         } else {
           currentStatusBadge.className = "badge badge-info";
@@ -590,7 +691,6 @@ document.addEventListener("DOMContentLoaded", () => {
         metricFailed.textContent = job.failed;
         metricSkipped.textContent = job.skipped;
 
-        // Privacy-masked Activity Log Terminal
         logTerminal.innerHTML = "";
         job.recent_logs.forEach(msg => {
           const d = document.createElement("div");
@@ -607,17 +707,29 @@ document.addEventListener("DOMContentLoaded", () => {
           btnRetryFailed.style.display = "none";
         }
 
-        if (job.status === "completed" || job.status === "failed") {
+        if (job.status === "completed" || job.status === "failed" || job.status === "cancelled") {
           clearInterval(pollInterval);
           btnStartBulk.disabled = false;
           btnStartBulk.textContent = "▶ Start Bulk Processing";
+
+          // Save batch metadata to Local History
+          recordLocalHistory({
+            job_id: jobId,
+            timestamp: new Date().toLocaleString(),
+            portal_url: portalUrl || job.portal_url,
+            total: job.total,
+            successful: job.successful,
+            failed: job.failed,
+            skipped: job.skipped,
+            status: job.status
+          });
 
           setupExportLinks(jobId);
           step5Card.style.display = "block";
         }
 
       } catch (e) {
-        console.error("Polling error:", e);
+        console.error("Polling notice:", e);
       }
     }, 1000);
   }
@@ -636,6 +748,12 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBadge = `<span class="badge badge-warn" title="${r.error_message}">Skipped</span>`;
       }
 
+      // Verification warning indicator
+      let verifyBadge = "";
+      if (r.verification_flags && r.verification_flags.length > 0) {
+        verifyBadge = ` <span class="badge badge-warn" title="${r.verification_flags.join('; ')}">⚠️ Review</span>`;
+      }
+
       let pdfCell = "-";
       if (r.pdf_path) {
         pdfCell = `<a href="/api/download/${currentJobId}/pdf?enrollment=${encodeURIComponent(r.enrollment)}" target="_blank" class="btn btn-secondary btn-sm">View PDF</a>`;
@@ -650,7 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${idx + 1}</td>
         <td><strong>${r.enrollment}</strong></td>
         <td>${r.student_name || "-"}</td>
-        <td>${r.total_obtained ? `${r.total_obtained} / ${r.total_max}` : "-"}</td>
+        <td>${r.total_obtained ? `${r.total_obtained} / ${r.total_max}` : "-"}${verifyBadge}</td>
         <td>${r.overall_percentage ? `${r.overall_percentage}%` : "-"}</td>
         <td>${r.result_status || "-"}</td>
         <td>${statusBadge}</td>
@@ -706,7 +824,86 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- 7. FAQ Accordion Interaction ---
+
+  // --- 10. Local-Only Processing History Management ---
+  function getLocalHistory() {
+    try {
+      const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function recordLocalHistory(entry) {
+    const history = getLocalHistory();
+    // Prepend new entry
+    history.unshift(entry);
+    // Keep max 25 recent batch metadata entries
+    if (history.length > 25) history.length = 25;
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    if (!historyTableBody) return;
+    const history = getLocalHistory();
+
+    if (history.length === 0) {
+      const emptyMsg = (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[currentLanguage] && TRANSLATIONS[currentLanguage].history_empty)
+        ? TRANSLATIONS[currentLanguage].history_empty
+        : "No local processing history recorded yet.";
+      historyTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${emptyMsg}</td></tr>`;
+      return;
+    }
+
+    historyTableBody.innerHTML = "";
+    history.forEach((h, idx) => {
+      const tr = document.createElement("tr");
+
+      let stClass = "badge-gray";
+      if (h.status === "completed") stClass = "badge-success";
+      else if (h.status === "failed") stClass = "badge-fail";
+
+      const portalDisplay = h.portal_url ? h.portal_url.replace(/^https?:\/\//, '').split('/')[0] : "University Portal";
+
+      tr.innerHTML = `
+        <td>${h.timestamp}</td>
+        <td><code>${portalDisplay}</code></td>
+        <td>${h.total} records (${h.successful} success, ${h.failed} fail)</td>
+        <td><span class="badge ${stClass}">${h.status}</span></td>
+        <td>
+          <button class="btn btn-secondary btn-sm btn-del-history" data-index="${idx}" style="color: #991b1b;">Delete</button>
+        </td>
+      `;
+      historyTableBody.appendChild(tr);
+    });
+
+    document.querySelectorAll(".btn-del-history").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const itemIdx = parseInt(btn.getAttribute("data-index"), 10);
+        deleteHistoryItem(itemIdx);
+      });
+    });
+  }
+
+  function deleteHistoryItem(idx) {
+    const history = getLocalHistory();
+    history.splice(idx, 1);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    renderHistory();
+  }
+
+  if (btnClearHistory) {
+    btnClearHistory.addEventListener("click", () => {
+      if (confirm("Permanently clear all local processing history from this browser?")) {
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        renderHistory();
+      }
+    });
+  }
+
+  // --- 11. FAQ Accordions ---
   document.querySelectorAll(".faq-question").forEach(q => {
     q.addEventListener("click", () => {
       const item = q.parentElement;

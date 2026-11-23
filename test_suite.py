@@ -16,6 +16,7 @@ from engine.excel_parser import ExcelParser
 from engine.exporter import ResultExporter
 from engine.processor import get_batch_processor
 from engine.security import validate_university_url, sanitize_job_id
+from engine.analytics import ResultVerifier, AcademicAnalytics
 from connectors.base import StudentResult, SubjectMarks
 
 
@@ -275,6 +276,157 @@ class TestResultProcessor(unittest.TestCase):
             files={"file": ("huge.xlsx", io.BytesIO(oversized_data), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
         )
         self.assertEqual(resp.status_code, 413)
+
+    def test_09_result_verifier_integrity(self):
+        """Test verification engine checks for marks boundaries, negative marks, and missing marks."""
+        # 1. Invalid: obtained exceeds max
+        bad_student = StudentResult(
+            enrollment="ERR001",
+            student_name="Exceed Marks",
+            status="Success",
+            total_obtained=650.0,
+            total_max=500.0,
+            overall_percentage=130.0,
+            subjects=[
+                SubjectMarks(code="CS1", name="Math", theory_max=100, theory_obtained=110)
+            ]
+        )
+        flags = ResultVerifier.verify(bad_student)
+        self.assertTrue(any("exceeds maximum" in f.lower() for f in flags))
+        self.assertTrue(any("theory obtained" in f.lower() for f in flags))
+
+        # 2. Negative marks
+        neg_student = StudentResult(
+            enrollment="ERR002",
+            student_name="Negative Marks",
+            status="Success",
+            total_obtained=-10.0,
+            total_max=500.0,
+            subjects=[
+                SubjectMarks(code="CS2", name="Physics", practical_max=50, practical_obtained=-5)
+            ]
+        )
+        neg_flags = ResultVerifier.verify(neg_student)
+        self.assertTrue(any("negative total marks" in f.lower() for f in neg_flags))
+        self.assertTrue(any("negative practical marks" in f.lower() for f in neg_flags))
+
+        # 3. Missing / unpublished marks
+        unpub_student = StudentResult(
+            enrollment="ERR003",
+            student_name="Unpublished Marks",
+            status="Success",
+            total_obtained=200.0,
+            total_max=500.0,
+            overall_percentage=40.0,
+            subjects=[
+                SubjectMarks(code="CS3", name="Lab", theory_max=None, theory_obtained=None, practical_max=None, practical_obtained=None, total_obtained=None)
+            ]
+        )
+        unpub_flags = ResultVerifier.verify(unpub_student)
+        self.assertTrue(any("unavailable or not published" in f.lower() for f in unpub_flags))
+
+        # 4. Valid student should have zero flags
+        valid_student = StudentResult(
+            enrollment="OK001",
+            student_name="Valid Student",
+            status="Success",
+            total_obtained=400.0,
+            total_max=500.0,
+            overall_percentage=80.0,
+            subjects=[
+                SubjectMarks(code="CS1", name="Math", theory_max=100, theory_obtained=80, total_max=100, total_obtained=80)
+            ]
+        )
+        valid_flags = ResultVerifier.verify(valid_student)
+        self.assertEqual(len(valid_flags), 0)
+
+    def test_10_academic_analytics(self):
+        """Test tied competition ranking (1224) and cohort statistics."""
+        s1 = StudentResult(enrollment="S1", student_name="Topper 1", status="Success", overall_percentage=90.0, total_obtained=450.0, total_max=500.0, result_status="PASS")
+        s2 = StudentResult(enrollment="S2", student_name="Topper 2 (Tied)", status="Success", overall_percentage=90.0, total_obtained=450.0, total_max=500.0, result_status="PASS")
+        s3 = StudentResult(enrollment="S3", student_name="Third Person", status="Success", overall_percentage=85.0, total_obtained=425.0, total_max=500.0, result_status="PASS")
+        s4 = StudentResult(enrollment="S4", student_name="Fourth Person", status="Success", overall_percentage=50.0, total_obtained=250.0, total_max=500.0, result_status="FAIL")
+
+        students = [s3, s1, s4, s2]
+        rankings = AcademicAnalytics.calculate_rankings(students)
+
+        # Ranks must follow standard competition ranking: 1, 1, 3, 4
+        ranks = [r["rank"] for r in rankings]
+        self.assertEqual(ranks, [1, 1, 3, 4])
+        self.assertEqual(rankings[0]["enrollment"], "S1")
+        self.assertEqual(rankings[1]["enrollment"], "S2")
+        self.assertEqual(rankings[2]["enrollment"], "S3")
+        self.assertEqual(rankings[3]["enrollment"], "S4")
+
+        # Class stats
+        stats = AcademicAnalytics.calculate_class_statistics(students)
+        self.assertEqual(stats["total_records"], 4)
+        self.assertEqual(stats["passed_count"], 3)
+        self.assertEqual(stats["reappear_count"], 1)
+        self.assertEqual(stats["highest_percentage"], 90.0)
+        self.assertEqual(stats["lowest_percentage"], 50.0)
+        self.assertAlmostEqual(stats["average_percentage"], 78.75, places=2)
+        self.assertAlmostEqual(stats["median_percentage"], 87.5, places=2)
+
+    def test_11_formula_injection_defense(self):
+        """Test formula injection sanitization on spreadsheet cell values."""
+        # Malicious formula strings
+        dangerous = ["=cmd|' /C calc'!A0", "+SUM(A1:A10)", "-2+3*cmd", "@SUM(B1)", "\tTAB_PAYLOAD", "\rCARRIAGE_PAYLOAD"]
+        for payload in dangerous:
+            sanitized = ResultExporter._sanitize_cell_value(payload)
+            self.assertTrue(sanitized.startswith("'"), f"Failed for {payload}: got {sanitized}")
+
+        # Safe values should remain untouched
+        safe_values = ["Normal Student Name", 100, 85.5, True, None, "E2100456"]
+        for safe in safe_values:
+            self.assertEqual(ResultExporter._sanitize_cell_value(safe), safe)
+
+    def test_12_job_cancellation(self):
+        """Test job cancellation endpoint and processor status."""
+        processor = get_batch_processor()
+        job = processor.create_job(
+            portal_url="https://results.university.edu/semester/exam",
+            connector_id="demo_university",
+            students=[{"enrollment": f"CANC_{i}", "name": f"Student {i}"} for i in range(100)],
+            options={"include_totals": True}
+        )
+        processor.start_job(job.job_id)
+        job_id = job.job_id
+        # Cancel via API endpoint
+        resp = self.client.post(f"/api/process/cancel/{job_id}")
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.json()["success"])
+
+        # Check job status is cancelled
+        job = processor.get_job(job_id)
+        self.assertIsNotNone(job)
+        self.assertIn(job.status, ("cancelled", "completed"))
+
+    def test_13_individual_pdf_generation(self):
+        """Test individual student PDF report generation."""
+        student = StudentResult(
+            enrollment="PDF001",
+            roll_number="R9988",
+            student_name="PDF Test Student",
+            father_name="Father Name",
+            institute="SkillSum Institute of Technology",
+            branch="Information Technology",
+            total_obtained=420.0,
+            total_max=500.0,
+            overall_percentage=84.0,
+            result_status="PASS",
+            division="First Division with Distinction",
+            status="Success",
+            subjects=[
+                SubjectMarks(code="IT101", name="Software Engineering", theory_max=100, theory_obtained=85, total_max=100, total_obtained=85, percentage=85.0, status="PASS"),
+                SubjectMarks(code="IT102", name="Database Systems", theory_max=100, theory_obtained=83, practical_max=50, practical_obtained=45, total_max=150, total_obtained=128, percentage=85.33, status="PASS")
+            ]
+        )
+        pdf_path = os.path.join(self.test_dir, "test_student_provisional.pdf")
+        gen_path = ResultExporter.generate_individual_student_pdf(student, pdf_path)
+        self.assertTrue(os.path.exists(gen_path))
+        self.assertGreater(os.path.getsize(gen_path), 1000)
+
 
 
 if __name__ == "__main__":

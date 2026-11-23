@@ -1,5 +1,6 @@
 """
-Excel Upload Parser with Column Auto-Detection, Mapping, and Record Validation.
+Excel Upload Parser with Smart Validation, Column Auto-Detection,
+Duplicate Review, and Record Verification.
 """
 import io
 import re
@@ -63,7 +64,7 @@ class ExcelParser:
     ) -> Dict[str, Any]:
         """
         Parse uploaded Excel file into dataframe and generate summary, preview,
-        and auto-detected mappings.
+        validation issues, and auto-detected mappings.
         """
         try:
             if filename.lower().endswith(".xls"):
@@ -71,7 +72,6 @@ class ExcelParser:
             else:
                 df = pd.read_excel(io.BytesIO(file_bytes), engine="openpyxl")
         except Exception as e:
-            # Try generic read
             try:
                 df = pd.read_excel(io.BytesIO(file_bytes))
             except Exception as ex:
@@ -97,19 +97,38 @@ class ExcelParser:
             preview_records.append(rec)
 
         total_rows = len(df)
-
-        # Validation stats based on auto-detected enrollment column
         enrollment_col = detected_mapping.get("enrollment")
+
         duplicate_count = 0
         empty_count = 0
         valid_count = 0
+        validation_issues: List[Dict[str, Any]] = []
 
         if enrollment_col and enrollment_col in df.columns:
-            non_empty_series = df[enrollment_col].dropna().astype(str).str.strip()
-            non_empty_series = non_empty_series[non_empty_series != ""]
-            empty_count = total_rows - len(non_empty_series)
-            duplicate_count = int(non_empty_series.duplicated().sum())
-            valid_count = len(non_empty_series.drop_duplicates())
+            seen_enr = {}
+            for row_idx, val in enumerate(df[enrollment_col], start=2):  # Row 2 is first data row
+                if pd.isna(val) or str(val).strip() == "" or str(val).strip().lower() == "nan":
+                    empty_count += 1
+                    validation_issues.append({
+                        "row": row_idx,
+                        "type": "empty_identifier",
+                        "severity": "warning",
+                        "message": f"Row {row_idx}: Missing or blank identifier in '{enrollment_col}'."
+                    })
+                else:
+                    val_str = str(int(val) if isinstance(val, float) and val.is_integer() else val).strip()
+                    if val_str in seen_enr:
+                        duplicate_count += 1
+                        first_row = seen_enr[val_str]
+                        validation_issues.append({
+                            "row": row_idx,
+                            "type": "duplicate_entry",
+                            "severity": "warning",
+                            "message": f"Row {row_idx}: Duplicate identifier '{val_str}' (first observed at Row {first_row})."
+                        })
+                    else:
+                        seen_enr[val_str] = row_idx
+                        valid_count += 1
         else:
             valid_count = total_rows
 
@@ -122,6 +141,7 @@ class ExcelParser:
             "duplicate_count": duplicate_count,
             "empty_count": empty_count,
             "valid_count": valid_count,
+            "validation_issues": validation_issues[:50],  # Keep first 50 row issues
         }
 
     @classmethod
@@ -131,9 +151,10 @@ class ExcelParser:
         filename: str,
         column_mapping: Dict[str, str],
         remove_duplicates: bool = True
-    ) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
+    ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
         """
         Extract clean student records using verified or user-mapped column names.
+        Returns extracted student dicts and comprehensive validation statistics.
         """
         if filename.lower().endswith(".xls"):
             df = pd.read_excel(io.BytesIO(file_bytes), engine="xlrd")
@@ -153,13 +174,23 @@ class ExcelParser:
             raise ValueError(f"Selected Enrollment/Roll column '{enrollment_col}' was not found in the file.")
 
         records = []
-        seen_enrollments = set()
-        stats = {"total": len(df), "valid": 0, "duplicates": 0, "empty": 0}
+        seen_enrollments = {}
+        row_issues = []
+        stats = {
+            "total": len(df),
+            "valid": 0,
+            "duplicates": 0,
+            "empty": 0,
+            "issues": []
+        }
 
         for idx, row in df.iterrows():
+            row_num = idx + 2
             raw_enr = row[enrollment_col]
+
             if pd.isna(raw_enr):
                 stats["empty"] += 1
+                row_issues.append({"row": row_num, "reason": "Empty enrollment field"})
                 continue
 
             # Format enrollment (convert float like 210123.0 to integer string)
@@ -170,13 +201,18 @@ class ExcelParser:
 
             if not enrollment or enrollment.lower() == "nan":
                 stats["empty"] += 1
+                row_issues.append({"row": row_num, "reason": "Empty/NaN enrollment value"})
                 continue
 
-            if remove_duplicates and enrollment in seen_enrollments:
+            # Check duplicate
+            if enrollment in seen_enrollments:
                 stats["duplicates"] += 1
-                continue
-
-            seen_enrollments.add(enrollment)
+                first_seen = seen_enrollments[enrollment]
+                row_issues.append({"row": row_num, "reason": f"Duplicate of Row {first_seen} ({enrollment})"})
+                if remove_duplicates:
+                    continue
+            else:
+                seen_enrollments[enrollment] = row_num
 
             # Date of birth formatting
             dob_val = ""
@@ -208,7 +244,7 @@ class ExcelParser:
                 branch_val = str(row[branch_col]).strip()
 
             records.append({
-                "row_index": idx + 1,
+                "row_index": row_num,
                 "enrollment": enrollment,
                 "roll_number": enrollment,
                 "dob": dob_val,
@@ -218,4 +254,5 @@ class ExcelParser:
             })
             stats["valid"] += 1
 
+        stats["issues"] = row_issues
         return records, stats

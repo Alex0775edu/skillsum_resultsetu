@@ -5,11 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title class="brand-text-name">SkillSum ResultSetu - SkillSum Innovations</title>
   <meta name="description" content="Free and open-source bulk academic result processing utility by SkillSum Innovations.">
+  <meta name="theme-color" content="#14532d">
+  <link rel="manifest" href="/static/manifest.json">
   <link rel="stylesheet" href="/static/css/style.css">
   <!-- Self-contained local vendor library for client-side Excel parsing -->
   <script src="/static/js/vendor/xlsx.full.min.js"></script>
+  <!-- Bilingual translation dictionary -->
+  <script src="/static/js/translations.js"></script>
 </head>
 <body>
+
+  <!-- Offline Status Banner -->
+  <div id="offlineBanner" class="offline-banner" style="display: none;" data-i18n="offline_msg">
+    ⚠️ You are currently offline. University result queries require an active internet connection.
+  </div>
 
   <!-- Top Navigation Header -->
   <header>
@@ -32,15 +41,23 @@
         </div>
       </a>
 
-      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">☰</button>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <!-- Language Switcher -->
+        <div class="lang-selector">
+          <button id="btnLangEn" class="btn-lang active" title="English">EN</button>
+          <button id="btnLangHi" class="btn-lang" title="हिन्दी">हिन्दी</button>
+        </div>
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">☰</button>
+      </div>
 
       <ul class="nav-links" id="navLinks">
-        <li><a href="#home" class="nav-link active" data-nav="home">Home</a></li>
-        <li><a href="#how-it-works" class="nav-link" data-nav="how-it-works">How It Works</a></li>
-        <li><a href="#universities" class="nav-link" data-nav="universities">Supported Universities</a></li>
-        <li><a href="#faq" class="nav-link" data-nav="faq">FAQ</a></li>
-        <li><a href="#contact" class="nav-link" data-nav="contact">Contact</a></li>
-        <li><a href="#process" class="nav-link btn-nav-cta" data-nav="process">Process Results</a></li>
+        <li><a href="#home" class="nav-link active" data-nav="home" data-i18n="nav_home">Home</a></li>
+        <li><a href="#how-it-works" class="nav-link" data-nav="how-it-works" data-i18n="nav_how_it_works">How It Works</a></li>
+        <li><a href="#universities" class="nav-link" data-nav="universities" data-i18n="nav_universities">Supported Universities</a></li>
+        <li><a href="#faq" class="nav-link" data-nav="faq" data-i18n="nav_faq">FAQ</a></li>
+        <li><a href="#history" class="nav-link" data-nav="history" data-i18n="nav_history">Local History</a></li>
+        <li><a href="#contact" class="nav-link" data-nav="contact" data-i18n="nav_contact">Contact</a></li>
+        <li><a href="#process" class="nav-link btn-nav-cta" data-nav="process" data-i18n="nav_process">Process Results</a></li>
       </ul>
     </div>
   </header>
@@ -51,15 +68,15 @@
     <section class="page-view active" id="view-home">
       <div class="hero-card">
         <div class="hero-pill">
-          <span>✓</span> 100% Free & Open Source &bull; MIT License
+          <span data-i18n="hero_badge">✓ 100% Free & Open Source • MIT License</span>
         </div>
         <h1 class="hero-title brand-text-name">SkillSum ResultSetu</h1>
-        <p class="hero-tagline brand-text-tagline">Simplify bulk academic result processing.</p>
+        <p class="hero-tagline brand-text-tagline" data-i18n="hero_tagline">Simplify bulk academic result processing.</p>
         <div class="hero-actions">
-          <a href="#process" class="hero-btn-primary" data-nav="process">
+          <a href="#process" class="hero-btn-primary" data-nav="process" data-i18n="hero_launch_btn">
             🚀 Launch Bulk Processing
           </a>
-          <a href="#how-it-works" class="hero-btn-secondary" data-nav="how-it-works">
+          <a href="#how-it-works" class="hero-btn-secondary" data-nav="how-it-works" data-i18n="hero_learn_btn">
             Learn How It Works
           </a>
         </div>
@@ -124,12 +141,12 @@
       <div class="step-card active" id="step1-card">
         <div class="step-header">
           <div class="step-number">1</div>
-          <div class="step-title">Select Result Portal</div>
-          <div class="step-desc">Enter college or university examination portal URL</div>
+          <div class="step-title" data-i18n="step1_title">Select Result Portal</div>
+          <div class="step-desc" data-i18n="step1_desc">Enter college or university examination portal URL</div>
         </div>
 
         <div class="form-group">
-          <label for="portalUrl">Result Portal URL</label>
+          <label for="portalUrl" data-i18n="step1_input_label">Result Portal URL</label>
           <div class="input-with-button">
             <input
               type="url"
@@ -137,13 +154,13 @@
               placeholder="https://result.bteexam.com/even/main/rollno.aspx"
               value="https://result.bteexam.com/even/main/rollno.aspx"
             />
-            <button class="btn btn-primary" id="btnValidateUrl">Validate Portal</button>
+            <button class="btn btn-primary" id="btnValidateUrl" data-i18n="step1_validate_btn">Validate Portal</button>
           </div>
           
           <div class="quick-links">
-            <span class="quick-links-title">Quick Select:</span>
-            <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx">BTEUP Official Portal</button>
-            <button class="btn-pill" data-url="https://results.university.edu/semester/exam">Standard University (Demo & Testing)</button>
+            <span class="quick-links-title" data-i18n="step1_quick_title">Quick Select:</span>
+            <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx" data-i18n="step1_bteup_btn">BTEUP Official Portal</button>
+            <button class="btn-pill" data-url="https://results.university.edu/semester/exam" data-i18n="step1_demo_btn">Standard University (Demo & Testing)</button>
           </div>
         </div>
 
@@ -157,23 +174,23 @@
       <div class="step-card" id="step2-card">
         <div class="step-header">
           <div class="step-number">2</div>
-          <div class="step-title">Upload Student List (Excel)</div>
-          <div class="step-desc">Processed locally in your browser</div>
+          <div class="step-title" data-i18n="step2_title">Upload Student List (Excel)</div>
+          <div class="step-desc" data-i18n="step2_desc">Processed locally in your browser</div>
         </div>
 
         <div class="upload-dropzone" id="dropzone">
           <div class="upload-icon">📄</div>
-          <div class="upload-text">Drag & drop your student Excel file here, or click to browse</div>
-          <div class="upload-hint">Supports .xlsx and .xls files containing student enrollments or roll numbers</div>
+          <div class="upload-text" data-i18n="step2_drop_text">Drag & drop your student Excel file here, or click to browse</div>
+          <div class="upload-hint" data-i18n="step2_drop_hint">Supports .xlsx and .xls files containing student enrollments or roll numbers</div>
           <div>
-            <span class="privacy-badge-local">🔒 Client-Side Local Parsing Enabled</span>
+            <span class="privacy-badge-local" data-i18n="step2_badge_local">🔒 Client-Side Local Parsing Enabled</span>
           </div>
           <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
         </div>
 
         <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-          <span style="font-size: 0.8rem; color: var(--text-muted);">Need a structured format template?</span>
-          <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download>
+          <span style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="step2_template_text">Need a structured format template?</span>
+          <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download data-i18n="step2_template_btn">
             ⬇ Download Sample Excel Template
           </a>
         </div>
@@ -182,43 +199,43 @@
         <div id="uploadAnalysisPanel" style="display: none; margin-top: 1.25rem;">
           <div class="upload-summary-grid">
             <div class="stat-chip">
-              <div class="stat-chip-label">Total Rows</div>
+              <div class="stat-chip-label" data-i18n="step2_total_rows">Total Rows</div>
               <div class="stat-chip-val" id="statTotalRows">0</div>
             </div>
             <div class="stat-chip">
-              <div class="stat-chip-label">Valid Records</div>
+              <div class="stat-chip-label" data-i18n="step2_valid_rows">Valid Records</div>
               <div class="stat-chip-val" id="statValidRows" style="color: var(--success);">0</div>
             </div>
             <div class="stat-chip">
-              <div class="stat-chip-label">Duplicate Rows</div>
+              <div class="stat-chip-label" data-i18n="step2_dup_rows">Duplicate Rows</div>
               <div class="stat-chip-val" id="statDuplicateRows" style="color: var(--danger);">0</div>
             </div>
             <div class="stat-chip">
-              <div class="stat-chip-label">Empty Rows</div>
+              <div class="stat-chip-label" data-i18n="step2_empty_rows">Empty Rows</div>
               <div class="stat-chip-val" id="statEmptyRows" style="color: var(--warning);">0</div>
             </div>
           </div>
 
           <div style="margin: 1rem 0 0.5rem 0;">
-            <label style="font-size: 0.9rem; font-weight: 700;">Confirm or Map Excel Columns:</label>
+            <label style="font-size: 0.9rem; font-weight: 700;" data-i18n="step2_map_label">Confirm or Map Excel Columns:</label>
           </div>
           <div class="mapping-grid">
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="mapEnrollment">Enrollment / Roll No Column *</label>
+              <label for="mapEnrollment" data-i18n="step2_map_enr">Enrollment / Roll No Column *</label>
               <select id="mapEnrollment"></select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="mapDob">Date of Birth (DOB) Column</label>
+              <label for="mapDob" data-i18n="step2_map_dob">Date of Birth (DOB) Column</label>
               <select id="mapDob"></select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="mapName">Student Name Column</label>
+              <label for="mapName" data-i18n="step2_map_name">Student Name Column</label>
               <select id="mapName"></select>
             </div>
           </div>
 
           <div style="margin: 1rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Student Records Preview (First 10 Rows):</span>
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);" data-i18n="step2_preview_title">Student Records Preview (First 10 Rows):</span>
             <span id="previewNotice" style="font-size: 0.75rem; color: var(--text-muted);"></span>
           </div>
           <div class="table-container">
@@ -236,55 +253,55 @@
       <div class="step-card" id="step3-card">
         <div class="step-header">
           <div class="step-number">3</div>
-          <div class="step-title">Configure Extraction Options</div>
-          <div class="step-desc">Select desired data fields and export artifacts</div>
+          <div class="step-title" data-i18n="step3_title">Configure Extraction Options</div>
+          <div class="step-desc" data-i18n="step3_desc">Select desired data fields and export artifacts</div>
         </div>
 
         <div class="options-grid">
           <label class="option-card">
             <input type="checkbox" id="optAllSubjects" checked />
-            <span class="option-label">All Subjects</span>
+            <span class="option-label" data-i18n="step3_opt_all">All Subjects</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optTheory" checked />
-            <span class="option-label">Theory Marks</span>
+            <span class="option-label" data-i18n="step3_opt_theory">Theory Marks</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optPractical" checked />
-            <span class="option-label">Practical Marks</span>
+            <span class="option-label" data-i18n="step3_opt_practical">Practical Marks</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optInternal" checked />
-            <span class="option-label">Internal / Sessional Marks</span>
+            <span class="option-label" data-i18n="step3_opt_internal">Internal / Sessional Marks</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optSubjectPct" checked />
-            <span class="option-label">Subject-wise Percentages</span>
+            <span class="option-label" data-i18n="step3_opt_subject_pct">Subject-wise Percentages</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optTotals" checked />
-            <span class="option-label">Total Marks (Obtained / Max)</span>
+            <span class="option-label" data-i18n="step3_opt_totals">Total Marks (Obtained / Max)</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optPercentage" checked />
-            <span class="option-label">Overall Percentage (%)</span>
+            <span class="option-label" data-i18n="step3_opt_percentage">Overall Percentage (%)</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optStatus" checked />
-            <span class="option-label">Pass / Fail Status</span>
+            <span class="option-label" data-i18n="step3_opt_status">Pass / Fail Status</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optPdf" checked />
-            <span class="option-label">Complete Marksheet PDF</span>
+            <span class="option-label" data-i18n="step3_opt_pdf">Individual Performance PDF</span>
           </label>
           <label class="option-card">
             <input type="checkbox" id="optForceDownload" />
-            <span class="option-label">Force Re-download (Bypass Cache)</span>
+            <span class="option-label" data-i18n="step3_opt_force">Force Re-download (Bypass Cache)</span>
           </label>
         </div>
 
         <div style="margin-top: 1.25rem;">
-          <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;">
+          <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;" data-i18n="step3_start_btn">
             ▶ Start Bulk Processing
           </button>
         </div>
@@ -294,10 +311,15 @@
       <div class="progress-card" id="step4-card" style="display: none;">
         <div class="progress-header">
           <div>
-            <span style="font-size: 1.15rem; font-weight: 700;">Processing Students</span>
+            <span style="font-size: 1.15rem; font-weight: 700;" data-i18n="step4_processing_title">Processing Students</span>
             <span id="currentStatusBadge" class="badge badge-info" style="margin-left: 0.5rem;">Running</span>
           </div>
-          <div style="font-size: 0.95rem; font-weight: 700;" id="progressPercentage">0%</div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="font-size: 0.95rem; font-weight: 700;" id="progressPercentage">0%</div>
+            <button class="btn btn-secondary btn-sm" id="btnCancelProcess" style="background: #fee2e2; color: #991b1b; border-color: #fca5a5;" data-i18n="step4_cancel_btn">
+              ⏹ Cancel Processing
+            </button>
+          </div>
         </div>
 
         <div class="progress-bar-bg">
@@ -306,19 +328,19 @@
 
         <div class="metrics-cards">
           <div class="metric-box total">
-            <div class="metric-title">Total</div>
+            <div class="metric-title" data-i18n="step4_total">Total</div>
             <div class="metric-number" id="metricTotal">0</div>
           </div>
           <div class="metric-box success">
-            <div class="metric-title">Success</div>
+            <div class="metric-title" data-i18n="step4_success">Success</div>
             <div class="metric-number" id="metricSuccess">0</div>
           </div>
           <div class="metric-box failed">
-            <div class="metric-title">Failed</div>
+            <div class="metric-title" data-i18n="step4_failed">Failed</div>
             <div class="metric-number" id="metricFailed">0</div>
           </div>
           <div class="metric-box skipped">
-            <div class="metric-title">Skipped</div>
+            <div class="metric-title" data-i18n="step4_skipped">Skipped</div>
             <div class="metric-number" id="metricSkipped">0</div>
           </div>
         </div>
@@ -329,8 +351,8 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span style="font-weight: 700; font-size: 0.9rem;">Live Result Stream:</span>
-          <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;">
+          <span style="font-weight: 700; font-size: 0.9rem;" data-i18n="step4_stream_title">Live Result Stream:</span>
+          <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;" data-i18n="step4_retry_failed_btn">
             🔄 Retry All Failed
           </button>
         </div>
@@ -358,56 +380,95 @@
       <div class="step-card" id="step5-card" style="display: none;">
         <div class="step-header">
           <div class="step-number" style="background: var(--success);">5</div>
-          <div class="step-title">Export & Download Results</div>
-          <div class="step-desc">Dynamic Excel calculations & preserved original marksheets</div>
+          <div class="step-title" data-i18n="step5_title">Export & Download Results</div>
+          <div class="step-desc" data-i18n="step5_desc">Dynamic Excel calculations & preserved original marksheets</div>
         </div>
 
         <div class="export-grid">
           <div class="export-card">
             <div>
-              <div class="export-card-title">📊 Consolidated Excel</div>
-              <div class="export-card-desc">Master sheet with student details, extracted totals, and evaluated grades.</div>
+              <div class="export-card-title" data-i18n="step5_cons_title">📊 Consolidated Excel</div>
+              <div class="export-card-desc" data-i18n="step5_cons_desc">Master sheet with student details, evaluated subjects, and dynamic totals.</div>
             </div>
-            <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank">Download Excel (.xlsx)</a>
+            <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank" data-i18n="step5_cons_btn">Download Excel (.xlsx)</a>
           </div>
 
           <div class="export-card">
             <div>
-              <div class="export-card-title">📑 Subject-Wise Sheets</div>
-              <div class="export-card-desc">Dedicated worksheet tab per subject with Theory, Practical & Sessional splits.</div>
+              <div class="export-card-title" data-i18n="step5_subj_title">📑 Subject-Wise Sheets</div>
+              <div class="export-card-desc" data-i18n="step5_subj_desc">Dedicated worksheet tab per subject with Theory, Practical & Sessional splits.</div>
             </div>
-            <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank">Download Subject Excel</a>
+            <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank" data-i18n="step5_subj_btn">Download Subject Excel</a>
           </div>
 
           <div class="export-card">
             <div>
-              <div class="export-card-title">📂 Marksheets Archive</div>
-              <div class="export-card-desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
+              <div class="export-card-title" data-i18n="step5_zip_title">📂 Marksheets Archive</div>
+              <div class="export-card-desc" data-i18n="step5_zip_desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
             </div>
-            <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank">Download Marksheets (.zip)</a>
+            <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank" data-i18n="step5_zip_btn">Download Marksheets (.zip)</a>
           </div>
 
           <div class="export-card featured">
             <div>
-              <div class="export-card-title">📦 Complete Package</div>
-              <div class="export-card-desc">Full bundle: Consolidated Excel, Subject Sheets, PDFs & Summary report.</div>
+              <div class="export-card-title" data-i18n="step5_pkg_title">📦 Complete Package</div>
+              <div class="export-card-desc" data-i18n="step5_pkg_desc">Full bundle: Consolidated Excel, Subject Sheets, PDFs & Summary report.</div>
             </div>
-            <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank">Download Full Package (.zip)</a>
+            <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank" data-i18n="step5_pkg_btn">Download Full Package (.zip)</a>
           </div>
         </div>
 
         <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <span style="font-size: 0.82rem; color: var(--text-muted);">
+          <span style="font-size: 0.82rem; color: var(--text-muted);" data-i18n="step5_retention_notice">
             Files are retained for 30 minutes under our privacy lifecycle policy.
           </span>
-          <button class="btn btn-secondary btn-sm" id="btnResetApp">Start New Batch</button>
+          <button class="btn btn-secondary btn-sm" id="btnResetApp" data-i18n="step5_reset_btn">Start New Batch</button>
         </div>
       </div>
 
     </section>
 
 
-    <!-- 3. VIEW: HOW IT WORKS -->
+    <!-- 3. VIEW: LOCAL HISTORY -->
+    <section class="page-view" id="view-history">
+      <div class="content-card">
+        <div class="content-header">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <h1 class="content-title" data-i18n="history_title">Local Processing History</h1>
+              <div class="content-subtitle" data-i18n="history_desc">Stored only in your browser's local storage. Never sent to any server.</div>
+            </div>
+            <button class="btn btn-danger btn-sm" id="btnClearHistory" data-i18n="history_clear_all">Clear All History</button>
+          </div>
+        </div>
+        <div class="content-body">
+          <div class="callout-box">
+            <strong>Privacy Guarantee:</strong> Browser history records only batch timestamp, record counts, and status. Raw student names, roll numbers, marks, and result files are <strong>never</strong> saved to browser history.
+          </div>
+          <div class="table-container">
+            <table id="historyTable">
+              <thead>
+                <tr>
+                  <th data-i18n="history_col_date">Date & Time</th>
+                  <th data-i18n="history_col_portal">Portal / University</th>
+                  <th data-i18n="history_col_records">Records</th>
+                  <th data-i18n="history_col_status">Status</th>
+                  <th data-i18n="history_col_actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: var(--text-muted);" data-i18n="history_empty">No local processing history recorded yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 4. VIEW: HOW IT WORKS -->
     <section class="page-view" id="view-how-it-works">
       <div class="content-card">
         <div class="content-header">
@@ -416,14 +477,14 @@
         </div>
         <div class="content-body">
           <p>
-            The <strong class="brand-text-name">SkillSum ResultSetu</strong> operates on a modular, privacy-first pipeline that combines browser-local file processing with dedicated server-side university connectors.
+            <strong class="brand-text-name">SkillSum ResultSetu</strong> operates on a modular, privacy-first pipeline that combines browser-local file processing with dedicated server-side university connectors.
           </p>
 
           <h2>The 4-Stage Lifecycle</h2>
 
           <h3>Stage 1: Browser-Local Excel Parsing</h3>
           <p>
-            When you select an Excel spreadsheet (<code>.xlsx</code> or <code>.xls</code>), the file is read and parsed locally inside your web browser using modern client-side binary interpreters. The browser detects columns, extracts unique student identifiers, counts duplicates, and identifies empty rows without uploading the original Excel document to the server for preview.
+            When you select an Excel spreadsheet (<code>.xlsx</code> or <code>.xls</code>), the file is read and parsed locally inside your web browser using client-side binary interpreters. The browser detects columns, extracts unique student identifiers, counts duplicates, and identifies empty rows without uploading the original Excel document to the server for preview.
           </p>
 
           <h3>Stage 2: Portal Connector Routing</h3>
@@ -444,11 +505,11 @@
             <li>Navigates to the verified examination portal.</li>
             <li>Inputs the student roll number, enrollment number, and date of birth.</li>
             <li>Dismisses datepicker modals and unexpected alerts.</li>
-            <li>Captures the rendered official marksheet using Chromium CDP (Chrome DevTools Protocol) printToPDF.</li>
+            <li>Captures the rendered marksheet using Chromium CDP (Chrome DevTools Protocol) printToPDF.</li>
             <li>Extracts subject marks, theory scores, practical evaluations, and grand totals directly from the marksheet DOM.</li>
           </ul>
 
-          <h3>Stage 4: Dynamic Dynamic Excel & ZIP Packaging</h3>
+          <h3>Stage 4: Dynamic Excel & ZIP Packaging</h3>
           <p>
             Extracted values are compiled into dynamically styled Excel spreadsheets using OpenPyXL:
           </p>
@@ -466,7 +527,7 @@
     </section>
 
 
-    <!-- 4. VIEW: SUPPORTED UNIVERSITIES -->
+    <!-- 5. VIEW: SUPPORTED UNIVERSITIES -->
     <section class="page-view" id="view-universities">
       <div class="content-card">
         <div class="content-header">
@@ -480,7 +541,6 @@
 
           <h2>Active Built-in Connectors</h2>
           <div class="univ-grid" id="univGridContainer">
-            <!-- Dynamically populated or static baseline -->
             <div class="univ-card">
               <div class="univ-card-header">
                 <div class="univ-name">BTEUP (Board of Technical Education UP)</div>
@@ -529,7 +589,7 @@
     </section>
 
 
-    <!-- 5. VIEW: FAQ -->
+    <!-- 6. VIEW: FAQ -->
     <section class="page-view" id="view-faq">
       <div class="content-card">
         <div class="content-header">
@@ -539,7 +599,7 @@
         <div class="content-body">
           <div class="faq-item open">
             <div class="faq-question">
-              <span>Is this application really 100% free?</span>
+              <span>Is SkillSum ResultSetu really 100% free?</span>
               <span>▾</span>
             </div>
             <div class="faq-answer">
@@ -601,7 +661,7 @@
     </section>
 
 
-    <!-- 6. VIEW: PRIVACY POLICY -->
+    <!-- 7. VIEW: PRIVACY POLICY -->
     <section class="page-view" id="view-privacy">
       <div class="content-card">
         <div class="content-header">
@@ -610,7 +670,7 @@
         </div>
         <div class="content-body">
           <p>
-            This Privacy Policy accurately reflects the technical implementation of the <strong class="brand-text-name">SkillSum ResultSetu</strong>, an independent utility provided by <strong>SkillSum Innovations</strong>.
+            This Privacy Policy accurately reflects the technical implementation of <strong class="brand-text-name">SkillSum ResultSetu</strong>, an independent utility provided by <strong>SkillSum Innovations</strong>.
           </p>
 
           <h2>1. Information Processed</h2>
@@ -667,7 +727,7 @@
     </section>
 
 
-    <!-- 7. VIEW: TERMS & CONDITIONS -->
+    <!-- 8. VIEW: TERMS & CONDITIONS -->
     <section class="page-view" id="view-terms">
       <div class="content-card">
         <div class="content-header">
@@ -714,7 +774,7 @@
     </section>
 
 
-    <!-- 8. VIEW: DISCLAIMER -->
+    <!-- 9. VIEW: DISCLAIMER -->
     <section class="page-view" id="view-disclaimer">
       <div class="content-card">
         <div class="content-header">
@@ -723,7 +783,7 @@
         </div>
         <div class="content-body">
           <div class="callout-box warning">
-            <strong>Non-Affiliation Notice:</strong> The <span class="brand-text-name">SkillSum ResultSetu</span> is an independent open-source software project developed and maintained by <strong>SkillSum Innovations</strong>.
+            <strong>Non-Affiliation Notice:</strong> <span class="brand-text-name">SkillSum ResultSetu</span> is an independent open-source software project developed and maintained by <strong>SkillSum Innovations</strong>.
           </div>
 
           <h2>1. No Official Endorsement or Affiliation</h2>
@@ -750,7 +810,7 @@
     </section>
 
 
-    <!-- 9. VIEW: DATA HANDLING & RETENTION -->
+    <!-- 10. VIEW: DATA HANDLING & RETENTION -->
     <section class="page-view" id="view-data-handling">
       <div class="content-card">
         <div class="content-header">
@@ -792,7 +852,7 @@
     </section>
 
 
-    <!-- 10. VIEW: COPYRIGHT / TAKEDOWN POLICY -->
+    <!-- 11. VIEW: COPYRIGHT / TAKEDOWN POLICY -->
     <section class="page-view" id="view-copyright">
       <div class="content-card">
         <div class="content-header">
@@ -806,7 +866,7 @@
 
           <h2>Open-Source Codebase Copyright</h2>
           <p>
-            The source code of the <span class="brand-text-name">SkillSum ResultSetu</span> is copyrighted by SkillSum Innovations and open-source contributors, published under the open-source MIT License.
+            The source code of <span class="brand-text-name">SkillSum ResultSetu</span> is copyrighted by SkillSum Innovations and open-source contributors, published under the open-source MIT License.
           </p>
 
           <h2>Notice and Takedown Procedure</h2>
@@ -829,7 +889,7 @@
     </section>
 
 
-    <!-- 11. VIEW: CONTACT & SUPPORT -->
+    <!-- 12. VIEW: CONTACT & SUPPORT -->
     <section class="page-view" id="view-contact">
       <div class="content-card">
         <div class="content-header">
@@ -838,7 +898,7 @@
         </div>
         <div class="content-body">
           <p>
-            The <span class="brand-text-name">SkillSum ResultSetu</span> is maintained as an open-source community utility by <strong>SkillSum Innovations</strong>.
+            <span class="brand-text-name">SkillSum ResultSetu</span> is maintained as an open-source community utility by <strong>SkillSum Innovations</strong>.
           </p>
 
           <h2>General Inquiries & Community Support</h2>
@@ -859,7 +919,7 @@
     </section>
 
 
-    <!-- 12. VIEW: OPEN SOURCE / MIT LICENSE -->
+    <!-- 13. VIEW: OPEN SOURCE / MIT LICENSE -->
     <section class="page-view" id="view-license">
       <div class="content-card">
         <div class="content-header">
@@ -900,6 +960,28 @@
 
   </main>
 
+  <!-- Transparent Processing Consent Modal -->
+  <div id="consentModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title" data-i18n="consent_title">Transparent Processing Consent</div>
+      </div>
+      <div class="modal-body">
+        <p data-i18n="consent_p1">Before proceeding to server-side query execution, please review our privacy data handling notice:</p>
+        <ul>
+          <li data-i18n="consent_li1"><strong>What leaves the browser:</strong> Only the student identifiers (Enrollment/Roll No and DOB) necessary to query the examination portal.</li>
+          <li data-i18n="consent_li2"><strong>Where requests go:</strong> Requests are dispatched directly to the official university result website matched above.</li>
+          <li data-i18n="consent_li3"><strong>Temporary Storage:</strong> Result PDFs and generated spreadsheets are stored on the server for a maximum of 30 minutes (TTL) and then purged automatically.</li>
+          <li data-i18n="consent_li4"><strong>Zero Tracking:</strong> No student names or marks are recorded in permanent databases or server activity logs.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" id="btnConsentCancel" data-i18n="consent_cancel_btn">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="btnConsentConfirm" data-i18n="consent_accept_btn">I Understand & Proceed</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Responsive Footer with Comprehensive Links -->
   <footer>
     <div class="footer-container">
@@ -919,6 +1001,7 @@
           <li><a href="#how-it-works" data-nav="how-it-works">How It Works</a></li>
           <li><a href="#universities" data-nav="universities">Supported Universities</a></li>
           <li><a href="#faq" data-nav="faq">FAQ</a></li>
+          <li><a href="#history" data-nav="history">Local History</a></li>
         </ul>
       </div>
 

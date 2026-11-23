@@ -251,6 +251,16 @@ def get_process_status(job_id: str):
     }
 
 
+@app.post("/api/process/cancel/{job_id}")
+def cancel_processing_job(job_id: str):
+    """Safely cancel an active bulk processing job."""
+    clean_id = sanitize_job_id(job_id)
+    success = processor.cancel_job(clean_id)
+    if not success:
+        raise HTTPException(status_code=400, detail="Unable to cancel job. It may have already finished or does not exist.")
+    return {"success": True, "message": "Cancellation initiated."}
+
+
 @app.post("/api/process/retry/{job_id}/{enrollment}")
 def retry_single_record(job_id: str, enrollment: str):
     """Retry a single failed student result extraction."""

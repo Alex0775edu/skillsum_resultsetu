@@ -43,6 +43,7 @@ class ProcessingJob:
         os.makedirs(self.exports_dir, exist_ok=True)
 
         self.status = "queued"  # queued, running, completed, cancelled, expired
+        self.is_cancelled = False
         self.created_at = time.time()
         self.total = len(students)
         self.processed = 0
@@ -175,6 +176,16 @@ class BatchProcessor:
             daemon=True
         )
         worker_thread.start()
+        return True
+
+    def cancel_job(self, job_id: str) -> bool:
+        """Cancel an in-flight bulk processing job."""
+        job = self.get_job(job_id)
+        if not job or job.status != "running":
+            return False
+        job.is_cancelled = True
+        job.status = "cancelled"
+        job.add_log("Processing cancelled by user request.")
         return True
 
     @staticmethod
@@ -321,6 +332,11 @@ class BatchProcessor:
             job.add_log(f"Connected to portal handler: {connector.name}")
 
             for idx, student in enumerate(job.students, 1):
+                if job.is_cancelled:
+                    job.add_log("Processing cancelled by user request.")
+                    job.status = "cancelled"
+                    break
+
                 enrollment = student.get("enrollment", "")
                 masked = self._mask_id(enrollment)
                 job.current_display = f"Record [{idx}/{job.total}] ({masked})"
@@ -333,6 +349,20 @@ class BatchProcessor:
                         options=job.options,
                         output_dir=job.pdf_dir
                     )
+
+                    # Result verification & boundary check
+                    from engine.analytics import ResultVerifier
+                    res.verification_flags = ResultVerifier.verify(res)
+                    if res.verification_flags:
+                        res.is_verified = False
+
+                    # Ensure PDF exists if requested
+                    if job.options.get("download_pdf", True) and not res.pdf_path and res.status in ("Success", "Cached"):
+                        base_name = "".join(ch for ch in enrollment if ch.isalnum() or ch in ("_", "-"))
+                        gen_pdf = os.path.join(job.pdf_dir, f"{base_name}.pdf")
+                        ResultExporter.generate_individual_student_pdf(res, gen_pdf)
+                        if os.path.exists(gen_pdf):
+                            res.pdf_path = gen_pdf
 
                     job.results[enrollment] = res
                     job.processed += 1
@@ -368,18 +398,20 @@ class BatchProcessor:
             connector.cleanup()
             job.end_time = time.time()
             job.current_display = ""
-            job.status = "completed"
-            job.add_log(
-                f"Job finished in {job.get_elapsed_seconds()}s. "
-                f"Success: {job.successful}, Failed: {job.failed}, Skipped: {job.skipped}"
-            )
 
-            # Generate export files automatically
+            # Generate export files automatically before completing status
             try:
                 self._generate_exports(job)
                 job.add_log("Export packages generated successfully.")
             except Exception as exp_err:
                 job.add_log(f"Export generation notice: {str(exp_err)}")
+
+            if not job.is_cancelled:
+                job.status = "completed"
+            job.add_log(
+                f"Job finished in {job.get_elapsed_seconds()}s. "
+                f"Success: {job.successful}, Failed: {job.failed}, Skipped: {job.skipped}"
+            )
 
     def _generate_exports(self, job: ProcessingJob) -> None:
         """Create Excel sheets, PDF marksheets ZIP, and Complete Package ZIP."""

@@ -47,8 +47,11 @@ class StudentResult:
     overall_percentage: Optional[float] = None
     result_status: str = ""  # "PASS", "FAIL", "REAPPEAR", etc.
     division: str = ""
-    status: str = "Pending"  # "Success", "Failed", "Skipped", "Cached"
+    status: str = "Pending"  # "Success", "Failed", "Skipped", "Cached", "Cancelled"
     error_message: str = ""
+    verification_flags: List[str] = field(default_factory=list)
+    is_verified: bool = True
+    raw_data: Dict[str, Any] = field(default_factory=dict)
     pdf_path: str = ""
     timestamp: str = ""
 
