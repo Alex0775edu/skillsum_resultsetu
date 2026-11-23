@@ -60,6 +60,17 @@ class ConnectorRegistry:
             }
 
         url = url.strip()
+
+        # Security check: SSRF and network boundary validation
+        from engine.security import validate_university_url
+        is_safe, sec_msg = validate_university_url(url)
+        if not is_safe:
+            return {
+                "valid": False,
+                "supported": False,
+                "message": f"Security validation failed: {sec_msg}"
+            }
+
         parsed = urlparse(url)
         # Check scheme
         if not parsed.scheme:

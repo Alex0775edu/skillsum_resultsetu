@@ -3,328 +3,956 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Universal Bulk Result Processing App</title>
+  <title class="brand-text-name">Academic Result Processor - SkillSum Innovations</title>
+  <meta name="description" content="Free and open-source bulk academic result processing utility by SkillSum Innovations.">
   <link rel="stylesheet" href="/static/css/style.css">
+  <!-- Self-contained local vendor library for client-side Excel parsing -->
+  <script src="/static/js/vendor/xlsx.full.min.js"></script>
 </head>
 <body>
 
   <!-- Top Navigation Header -->
   <header>
     <div class="header-container">
-      <div class="brand">
-        <div class="brand-icon">R</div>
-        <div>
-          <div class="brand-title">Universal Bulk Result Processor</div>
-          <div class="brand-subtitle">Automated academic marksheet extraction & dynamic reporting engine</div>
+      <a href="#home" class="brand" data-nav="home">
+        <div class="brand-icon">
+          <!-- Abstract clean SVG icon: Document + Academic Marksheet + Download Arrow -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+            <path d="M12 11v6m-3-3l3 3 3-3" stroke="currentColor" stroke-width="2"></path>
+          </svg>
         </div>
-      </div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <span class="badge-open">Free & Open Source (MIT)</span>
-      </div>
+        <div>
+          <div class="brand-title brand-text-name">Academic Result Processor</div>
+          <div class="brand-subtitle">SkillSum Innovations</div>
+        </div>
+      </a>
+
+      <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link active" data-nav="home">Home</a></li>
+        <li><a href="#how-it-works" class="nav-link" data-nav="how-it-works">How It Works</a></li>
+        <li><a href="#universities" class="nav-link" data-nav="universities">Supported Universities</a></li>
+        <li><a href="#faq" class="nav-link" data-nav="faq">FAQ</a></li>
+        <li><a href="#contact" class="nav-link" data-nav="contact">Contact</a></li>
+        <li><a href="#process" class="nav-link btn-nav-cta" data-nav="process">Process Results</a></li>
+      </ul>
     </div>
   </header>
 
   <main>
 
-    <!-- STEP 1: Portal URL & Connector -->
-    <section class="step-card active" id="step1-card">
-      <div class="step-header">
-        <div class="step-number">1</div>
-        <div class="step-title">Select Result Website</div>
-        <div class="step-desc">Enter college or university examination portal URL</div>
-      </div>
-
-      <div class="form-group">
-        <label for="portalUrl">Result Portal URL</label>
-        <div class="input-with-button">
-          <input
-            type="url"
-            id="portalUrl"
-            placeholder="https://result.bteexam.com/even/main/rollno.aspx"
-            value="https://result.bteexam.com/even/main/rollno.aspx"
-          />
-          <button class="btn btn-primary" id="btnValidateUrl">Validate Portal</button>
+    <!-- 1. VIEW: HOME -->
+    <section class="page-view active" id="view-home">
+      <div class="hero-card">
+        <div class="hero-pill">
+          <span>✓</span> 100% Free & Open Source &bull; MIT License
         </div>
-        
-        <div class="quick-links">
-          <span class="quick-links-title">Quick Select:</span>
-          <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx">BTEUP Official Portal</button>
-          <button class="btn-pill" data-url="https://results.university.edu/semester/exam">Standard University (Demo & Offline Testing)</button>
+        <h1 class="hero-title brand-text-name">Academic Result Processor</h1>
+        <p class="hero-tagline brand-text-tagline">Simplify bulk academic result processing.</p>
+        <div class="hero-actions">
+          <a href="#process" class="hero-btn-primary" data-nav="process">
+            🚀 Launch Bulk Processing
+          </a>
+          <a href="#how-it-works" class="hero-btn-secondary" data-nav="how-it-works">
+            Learn How It Works
+          </a>
         </div>
       </div>
 
-      <!-- Portal Status Feedback -->
-      <div id="portalStatusBox" class="portal-status-box matched" style="display: none;">
-        <div id="portalStatusIcon">✓</div>
-        <div id="portalStatusText">
-          <strong>BTEUP Connector Matched:</strong> Board of Technical Education Uttar Pradesh. Required fields: Enrollment Number, Date of Birth.
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">🔒</div>
+          <div class="feature-title">Privacy-First Architecture</div>
+          <div class="feature-desc">
+            Excel files are parsed locally in your browser. Student lists are not retained permanently, and temporary files expire automatically in 30 minutes.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">🔌</div>
+          <div class="feature-title">Pluggable Connectors</div>
+          <div class="feature-desc">
+            Modular adapter pattern for university portals (including BTEUP and standard university systems). Reusable connectors can be added cleanly.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">📊</div>
+          <div class="feature-title">Dynamic Multi-Format Export</div>
+          <div class="feature-desc">
+            Generate Consolidated Master Excel sheets, Subject-wise workbooks, original PDF marksheets, and complete ZIP packages.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">⚡</div>
+          <div class="feature-title">No Accounts & Zero Trackers</div>
+          <div class="feature-desc">
+            Completely free with no registration, no user logins, no subscriptions, and zero advertising or analytics trackers.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">🎯</div>
+          <div class="feature-title">Pre-Flight Validation</div>
+          <div class="feature-desc">
+            Automatic column recognition with manual mapping fallback, record preview, empty row detection, and automatic deduplication.
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper">🔄</div>
+          <div class="feature-title">Real-Time Progress & Retry</div>
+          <div class="feature-desc">
+            Live execution tracking with progress bars, counters, and single-click retry for any network timeouts or failed student queries.
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- STEP 2: Excel Upload & Mapping -->
-    <section class="step-card" id="step2-card">
-      <div class="step-header">
-        <div class="step-number">2</div>
-        <div class="step-title">Upload Student List (Excel)</div>
-        <div class="step-desc">Support .xlsx and .xls formats</div>
+
+    <!-- 2. VIEW: PROCESS RESULTS (Main App Workflow) -->
+    <section class="page-view" id="view-process">
+      
+      <!-- STEP 1: Portal URL -->
+      <div class="step-card active" id="step1-card">
+        <div class="step-header">
+          <div class="step-number">1</div>
+          <div class="step-title">Select Result Portal</div>
+          <div class="step-desc">Enter college or university examination portal URL</div>
+        </div>
+
+        <div class="form-group">
+          <label for="portalUrl">Result Portal URL</label>
+          <div class="input-with-button">
+            <input
+              type="url"
+              id="portalUrl"
+              placeholder="https://result.bteexam.com/even/main/rollno.aspx"
+              value="https://result.bteexam.com/even/main/rollno.aspx"
+            />
+            <button class="btn btn-primary" id="btnValidateUrl">Validate Portal</button>
+          </div>
+          
+          <div class="quick-links">
+            <span class="quick-links-title">Quick Select:</span>
+            <button class="btn-pill" data-url="https://result.bteexam.com/even/main/rollno.aspx">BTEUP Official Portal</button>
+            <button class="btn-pill" data-url="https://results.university.edu/semester/exam">Standard University (Demo & Testing)</button>
+          </div>
+        </div>
+
+        <div id="portalStatusBox" class="portal-status-box matched" style="display: none;">
+          <div id="portalStatusIcon">✓</div>
+          <div id="portalStatusText"></div>
+        </div>
       </div>
 
-      <div class="upload-dropzone" id="dropzone">
-        <div class="upload-icon">📄</div>
-        <div class="upload-text">Drag & drop your Excel file here, or click to browse</div>
-        <div class="upload-hint">Supports .xlsx and .xls files with student roll numbers / enrollments</div>
-        <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
+      <!-- STEP 2: Excel Upload -->
+      <div class="step-card" id="step2-card">
+        <div class="step-header">
+          <div class="step-number">2</div>
+          <div class="step-title">Upload Student List (Excel)</div>
+          <div class="step-desc">Processed locally in your browser</div>
+        </div>
+
+        <div class="upload-dropzone" id="dropzone">
+          <div class="upload-icon">📄</div>
+          <div class="upload-text">Drag & drop your student Excel file here, or click to browse</div>
+          <div class="upload-hint">Supports .xlsx and .xls files containing student enrollments or roll numbers</div>
+          <div>
+            <span class="privacy-badge-local">🔒 Client-Side Local Parsing Enabled</span>
+          </div>
+          <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;" />
+        </div>
+
+        <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Need a structured format template?</span>
+          <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download>
+            ⬇ Download Sample Excel Template
+          </a>
+        </div>
+
+        <!-- Analysis & Mapping -->
+        <div id="uploadAnalysisPanel" style="display: none; margin-top: 1.25rem;">
+          <div class="upload-summary-grid">
+            <div class="stat-chip">
+              <div class="stat-chip-label">Total Rows</div>
+              <div class="stat-chip-val" id="statTotalRows">0</div>
+            </div>
+            <div class="stat-chip">
+              <div class="stat-chip-label">Valid Records</div>
+              <div class="stat-chip-val" id="statValidRows" style="color: var(--success);">0</div>
+            </div>
+            <div class="stat-chip">
+              <div class="stat-chip-label">Duplicate Rows</div>
+              <div class="stat-chip-val" id="statDuplicateRows" style="color: var(--danger);">0</div>
+            </div>
+            <div class="stat-chip">
+              <div class="stat-chip-label">Empty Rows</div>
+              <div class="stat-chip-val" id="statEmptyRows" style="color: var(--warning);">0</div>
+            </div>
+          </div>
+
+          <div style="margin: 1rem 0 0.5rem 0;">
+            <label style="font-size: 0.9rem; font-weight: 700;">Confirm or Map Excel Columns:</label>
+          </div>
+          <div class="mapping-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="mapEnrollment">Enrollment / Roll No Column *</label>
+              <select id="mapEnrollment"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="mapDob">Date of Birth (DOB) Column</label>
+              <select id="mapDob"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="mapName">Student Name Column</label>
+              <select id="mapName"></select>
+            </div>
+          </div>
+
+          <div style="margin: 1rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Student Records Preview (First 10 Rows):</span>
+            <span id="previewNotice" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+          </div>
+          <div class="table-container">
+            <table id="previewTable">
+              <thead>
+                <tr id="previewTableHead"></tr>
+              </thead>
+              <tbody id="previewTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div style="margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.8rem; color: var(--text-muted);">Need a format template?</span>
-        <a href="/api/download/sample-template" class="btn btn-secondary btn-sm" download>
-          ⬇ Download Sample Excel Template
-        </a>
+      <!-- STEP 3: Extraction Options -->
+      <div class="step-card" id="step3-card">
+        <div class="step-header">
+          <div class="step-number">3</div>
+          <div class="step-title">Configure Extraction Options</div>
+          <div class="step-desc">Select desired data fields and export artifacts</div>
+        </div>
+
+        <div class="options-grid">
+          <label class="option-card">
+            <input type="checkbox" id="optAllSubjects" checked />
+            <span class="option-label">All Subjects</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optTheory" checked />
+            <span class="option-label">Theory Marks</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optPractical" checked />
+            <span class="option-label">Practical Marks</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optInternal" checked />
+            <span class="option-label">Internal / Sessional Marks</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optSubjectPct" checked />
+            <span class="option-label">Subject-wise Percentages</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optTotals" checked />
+            <span class="option-label">Total Marks (Obtained / Max)</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optPercentage" checked />
+            <span class="option-label">Overall Percentage (%)</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optStatus" checked />
+            <span class="option-label">Pass / Fail Status</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optPdf" checked />
+            <span class="option-label">Complete Marksheet PDF</span>
+          </label>
+          <label class="option-card">
+            <input type="checkbox" id="optForceDownload" />
+            <span class="option-label">Force Re-download (Bypass Cache)</span>
+          </label>
+        </div>
+
+        <div style="margin-top: 1.25rem;">
+          <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;">
+            ▶ Start Bulk Processing
+          </button>
+        </div>
       </div>
 
-      <!-- Upload Analysis & Mapping Panel -->
-      <div id="uploadAnalysisPanel" style="display: none; margin-top: 1.25rem;">
-        
-        <!-- Summary Chips -->
-        <div class="upload-summary-grid">
-          <div class="stat-chip">
-            <div class="stat-chip-label">Total Rows</div>
-            <div class="stat-chip-val" id="statTotalRows">0</div>
+      <!-- STEP 4: Live Progress & Results -->
+      <div class="progress-card" id="step4-card" style="display: none;">
+        <div class="progress-header">
+          <div>
+            <span style="font-size: 1.15rem; font-weight: 700;">Processing Students</span>
+            <span id="currentStatusBadge" class="badge badge-info" style="margin-left: 0.5rem;">Running</span>
           </div>
-          <div class="stat-chip">
-            <div class="stat-chip-label">Valid Records</div>
-            <div class="stat-chip-val" id="statValidRows" style="color: var(--success);">0</div>
+          <div style="font-size: 0.95rem; font-weight: 700;" id="progressPercentage">0%</div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+
+        <div class="metrics-cards">
+          <div class="metric-box total">
+            <div class="metric-title">Total</div>
+            <div class="metric-number" id="metricTotal">0</div>
           </div>
-          <div class="stat-chip">
-            <div class="stat-chip-label">Duplicate Rows</div>
-            <div class="stat-chip-val" id="statDuplicateRows" style="color: var(--danger);">0</div>
+          <div class="metric-box success">
+            <div class="metric-title">Success</div>
+            <div class="metric-number" id="metricSuccess">0</div>
           </div>
-          <div class="stat-chip">
-            <div class="stat-chip-label">Empty Rows</div>
-            <div class="stat-chip-val" id="statEmptyRows" style="color: var(--warning);">0</div>
+          <div class="metric-box failed">
+            <div class="metric-title">Failed</div>
+            <div class="metric-number" id="metricFailed">0</div>
+          </div>
+          <div class="metric-box skipped">
+            <div class="metric-title">Skipped</div>
+            <div class="metric-number" id="metricSkipped">0</div>
           </div>
         </div>
 
-        <!-- Manual Column Mapping Fallback -->
-        <div style="margin: 1rem 0 0.5rem 0;">
-          <label style="font-size: 0.9rem; font-weight: 600;">Confirm or Map Excel Columns:</label>
-        </div>
-        <div class="mapping-grid">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="mapEnrollment">Enrollment / Roll No Column *</label>
-            <select id="mapEnrollment"></select>
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="mapDob">Date of Birth (DOB) Column</label>
-            <select id="mapDob"></select>
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="mapName">Student Name Column</label>
-            <select id="mapName"></select>
-          </div>
+        <!-- Privacy-Safe Activity Log -->
+        <div class="terminal-box" id="logTerminal">
+          <div>[System] Initializing processing task...</div>
         </div>
 
-        <!-- Preview Table -->
-        <div style="margin: 1rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 0.85rem; font-weight: 600; color: #475569;">First 10 Student Records Preview:</span>
-          <span id="previewNotice" style="font-size: 0.75rem; color: var(--text-muted);"></span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-weight: 700; font-size: 0.9rem;">Live Result Stream:</span>
+          <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;">
+            🔄 Retry All Failed
+          </button>
         </div>
-        <div class="table-container">
-          <table id="previewTable">
+        <div class="table-container" style="max-height: 340px; overflow-y: auto;">
+          <table id="liveResultsTable">
             <thead>
-              <tr id="previewTableHead"></tr>
+              <tr>
+                <th>#</th>
+                <th>Enrollment</th>
+                <th>Student Name</th>
+                <th>Total Marks</th>
+                <th>Percentage</th>
+                <th>Result</th>
+                <th>Status</th>
+                <th>Marksheet</th>
+                <th>Actions</th>
+              </tr>
             </thead>
-            <tbody id="previewTableBody"></tbody>
+            <tbody id="liveResultsBody"></tbody>
           </table>
         </div>
+      </div>
 
+      <!-- STEP 5: Export Artifacts -->
+      <div class="step-card" id="step5-card" style="display: none;">
+        <div class="step-header">
+          <div class="step-number" style="background: var(--success);">5</div>
+          <div class="step-title">Export & Download Results</div>
+          <div class="step-desc">Dynamic Excel calculations & preserved original marksheets</div>
+        </div>
+
+        <div class="export-grid">
+          <div class="export-card">
+            <div>
+              <div class="export-card-title">📊 Consolidated Excel</div>
+              <div class="export-card-desc">Master sheet with student details, extracted totals, and evaluated grades.</div>
+            </div>
+            <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank">Download Excel (.xlsx)</a>
+          </div>
+
+          <div class="export-card">
+            <div>
+              <div class="export-card-title">📑 Subject-Wise Sheets</div>
+              <div class="export-card-desc">Dedicated worksheet tab per subject with Theory, Practical & Sessional splits.</div>
+            </div>
+            <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank">Download Subject Excel</a>
+          </div>
+
+          <div class="export-card">
+            <div>
+              <div class="export-card-title">📂 Marksheets Archive</div>
+              <div class="export-card-desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
+            </div>
+            <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank">Download Marksheets (.zip)</a>
+          </div>
+
+          <div class="export-card featured">
+            <div>
+              <div class="export-card-title">📦 Complete Package</div>
+              <div class="export-card-desc">Full bundle: Consolidated Excel, Subject Sheets, PDFs & Summary report.</div>
+            </div>
+            <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank">Download Full Package (.zip)</a>
+          </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <span style="font-size: 0.82rem; color: var(--text-muted);">
+            Files are retained for 30 minutes under our privacy lifecycle policy.
+          </span>
+          <button class="btn btn-secondary btn-sm" id="btnResetApp">Start New Batch</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- 3. VIEW: HOW IT WORKS -->
+    <section class="page-view" id="view-how-it-works">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">How It Works</h1>
+          <div class="content-subtitle">Architecture and workflow of the bulk result processing utility.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            The <strong class="brand-text-name">Academic Result Processor</strong> operates on a modular, privacy-first pipeline that combines browser-local file processing with dedicated server-side university connectors.
+          </p>
+
+          <h2>The 4-Stage Lifecycle</h2>
+
+          <h3>Stage 1: Browser-Local Excel Parsing</h3>
+          <p>
+            When you select an Excel spreadsheet (<code>.xlsx</code> or <code>.xls</code>), the file is read and parsed locally inside your web browser using modern client-side binary interpreters. The browser detects columns, extracts unique student identifiers, counts duplicates, and identifies empty rows without uploading the original Excel document to the server for preview.
+          </p>
+
+          <h3>Stage 2: Portal Connector Routing</h3>
+          <p>
+            Each university examination portal has unique form structures, URL patterns, session tokens, and HTML layouts. The application uses a pluggable <strong>Connector/Adapter Pattern</strong>:
+          </p>
+          <ul>
+            <li>The system inspects the URL entered by the user.</li>
+            <li>It identifies a matching connector (e.g. BTEUP Connector or Demo Reference Connector).</li>
+            <li>If an arbitrary URL is supplied without a matching connector, the utility explains why an adapter is required rather than simulating fake results.</li>
+          </ul>
+
+          <h3>Stage 3: Automated Query & Marksheet Extraction</h3>
+          <p>
+            The backend connector processes students sequentially or with polite rate limiting to prevent overwhelming educational institutions:
+          </p>
+          <ul>
+            <li>Navigates to the verified examination portal.</li>
+            <li>Inputs the student roll number, enrollment number, and date of birth.</li>
+            <li>Dismisses datepicker modals and unexpected alerts.</li>
+            <li>Captures the rendered official marksheet using Chromium CDP (Chrome DevTools Protocol) printToPDF.</li>
+            <li>Extracts subject marks, theory scores, practical evaluations, and grand totals directly from the marksheet DOM.</li>
+          </ul>
+
+          <h3>Stage 4: Dynamic Dynamic Excel & ZIP Packaging</h3>
+          <p>
+            Extracted values are compiled into dynamically styled Excel spreadsheets using OpenPyXL:
+          </p>
+          <ul>
+            <li><strong>Consolidated Excel:</strong> Complete master record with all evaluated subjects, percentages, and pass/fail evaluations.</li>
+            <li><strong>Subject-Wise Excel:</strong> Dedicated tabs for each subject detailing Theory, Practical, and Sessional components.</li>
+            <li><strong>Marksheets Archive:</strong> Individual student PDF files compressed into a single clean ZIP file.</li>
+          </ul>
+
+          <div class="callout-box">
+            <strong>Data Integrity Principle:</strong> The utility never assumes arbitrary passing percentages or marks distributions. It extracts actual declared values and preserves original marksheet data.
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- STEP 3: Extraction Options -->
-    <section class="step-card" id="step3-card">
-      <div class="step-header">
-        <div class="step-number">3</div>
-        <div class="step-title">Configure Extraction Options</div>
-        <div class="step-desc">Select desired data fields and export artifacts</div>
-      </div>
 
-      <div class="options-grid">
-        <label class="option-card">
-          <input type="checkbox" id="optAllSubjects" checked />
-          <span class="option-label">All Subjects</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optTheory" checked />
-          <span class="option-label">Theory Marks</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optPractical" checked />
-          <span class="option-label">Practical Marks</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optInternal" checked />
-          <span class="option-label">Internal / Sessional Marks</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optSubjectPct" checked />
-          <span class="option-label">Subject-wise Percentages</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optTotals" checked />
-          <span class="option-label">Total Marks (Obtained / Max)</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optPercentage" checked />
-          <span class="option-label">Overall Percentage (%)</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optStatus" checked />
-          <span class="option-label">Pass / Fail Status</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optPdf" checked />
-          <span class="option-label">Complete Marksheet PDF</span>
-        </label>
-        <label class="option-card">
-          <input type="checkbox" id="optForceDownload" />
-          <span class="option-label">Force Re-download (Bypass Cache)</span>
-        </label>
-      </div>
+    <!-- 4. VIEW: SUPPORTED UNIVERSITIES -->
+    <section class="page-view" id="view-universities">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Supported Universities & Portals</h1>
+          <div class="content-subtitle">Directory of active connectors and multi-college adapter guide.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            Because university examination portals across India and internationally employ diverse web architectures (ASP.NET WebForms, PHP portals, Single Page Apps, CAPTCHA mechanisms, and PDF generators), arbitrary URLs cannot be automatically parsed without a corresponding connector.
+          </p>
 
-      <div style="margin-top: 1.25rem;">
-        <button class="btn btn-primary" id="btnStartBulk" style="padding: 0.75rem 2rem; font-size: 1rem;">
-          ▶ Start Bulk Processing
-        </button>
+          <h2>Active Built-in Connectors</h2>
+          <div class="univ-grid" id="univGridContainer">
+            <!-- Dynamically populated or static baseline -->
+            <div class="univ-card">
+              <div class="univ-card-header">
+                <div class="univ-name">BTEUP (Board of Technical Education UP)</div>
+                <span class="badge badge-success">Production</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                Official diploma examination portal (Semester & Annual).
+              </p>
+              <div style="font-size: 0.8rem;">
+                <strong>URL:</strong> <code>https://result.bteexam.com/even/main/rollno.aspx</code><br>
+                <strong>Required:</strong> Enrollment Number, Date of Birth (DD/MM/YYYY)
+              </div>
+            </div>
+
+            <div class="univ-card">
+              <div class="univ-card-header">
+                <div class="univ-name">Standard University Demo Portal</div>
+                <span class="badge badge-info">Reference / Demo</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                Multi-subject reference portal for testing, evaluation, and grading verification.
+              </p>
+              <div style="font-size: 0.8rem;">
+                <strong>URL:</strong> <code>https://results.university.edu/semester/exam</code><br>
+                <strong>Required:</strong> Enrollment / Roll Number
+              </div>
+            </div>
+          </div>
+
+          <h2>Why Doesn't an Arbitrary URL Work Automatically?</h2>
+          <p>
+            Unlike general web scrapers that grab unstructured paragraph text, academic result processing requires 100% precision:
+          </p>
+          <ul>
+            <li>Form input field names vary across institutions (<code>txtRollNo</code>, <code>enrollment</code>, <code>student_id</code>).</li>
+            <li>Some portals require Date of Birth, Mother's Name, or Captcha verification.</li>
+            <li>Marksheet tables use varied layouts for Theory, Practical, Sessional, and Grace Marks.</li>
+          </ul>
+
+          <h2>Adding a New University Connector</h2>
+          <p>
+            Adding support for a new university portal is simple! Create an adapter inheriting from <code>BaseConnector</code> in <code>connectors/</code>, define the URL matching rule and form submission steps, and submit a pull request on our open-source repository.
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- STEP 4: Bulk Processing & Live Progress -->
-    <section class="progress-card" id="step4-card" style="display: none;">
-      <div class="progress-header">
-        <div>
-          <span style="font-size: 1.15rem; font-weight: 700; color: #0f172a;">Processing Students</span>
-          <span id="currentStatusBadge" class="badge badge-info" style="margin-left: 0.5rem;">Running</span>
-        </div>
-        <div style="font-size: 0.95rem; font-weight: 600;" id="progressPercentage">0%</div>
-      </div>
 
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBar"></div>
-      </div>
+    <!-- 5. VIEW: FAQ -->
+    <section class="page-view" id="view-faq">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Frequently Asked Questions</h1>
+          <div class="content-subtitle">Common questions regarding usage, accuracy, formats, and privacy.</div>
+        </div>
+        <div class="content-body">
+          <div class="faq-item open">
+            <div class="faq-question">
+              <span>Is this application really 100% free?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              Yes. It is published under the permissive MIT License by SkillSum Innovations. There are no paid tiers, subscription plans, API fees, or hidden costs.
+            </div>
+          </div>
 
-      <!-- Real-time Counters -->
-      <div class="metrics-cards">
-        <div class="metric-box total">
-          <div class="metric-title">Total</div>
-          <div class="metric-number" id="metricTotal">0</div>
-        </div>
-        <div class="metric-box success">
-          <div class="metric-title">Success</div>
-          <div class="metric-number" id="metricSuccess">0</div>
-        </div>
-        <div class="metric-box failed">
-          <div class="metric-title">Failed</div>
-          <div class="metric-number" id="metricFailed">0</div>
-        </div>
-        <div class="metric-box skipped">
-          <div class="metric-title">Skipped</div>
-          <div class="metric-number" id="metricSkipped">0</div>
-        </div>
-      </div>
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>Do I need to register or create an account?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              No. There is no user registration, login, session database, or password system. You can open the utility and start processing immediately.
+            </div>
+          </div>
 
-      <!-- Real-time Log Feed -->
-      <div class="terminal-box" id="logTerminal">
-        <div>[System] Initializing processing task...</div>
-      </div>
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>Is student personal data stored on your servers?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              No permanent student records are stored. When using browser-local parsing, your original Excel spreadsheet is processed inside your browser. Query results and marksheets generated during a session are stored in a transient temporary directory with an automatic 30-minute time-to-live (TTL) expiration, after which they are permanently deleted.
+            </div>
+          </div>
 
-      <!-- Live Results Stream Table -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <span style="font-weight: 600; font-size: 0.9rem;">Live Result Stream:</span>
-        <button class="btn btn-danger btn-sm" id="btnRetryFailed" style="display: none;">
-          🔄 Retry All Failed
-        </button>
-      </div>
-      <div class="table-container" style="max-height: 340px; overflow-y: auto;">
-        <table id="liveResultsTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Enrollment</th>
-              <th>Student Name</th>
-              <th>Total Marks</th>
-              <th>Percentage</th>
-              <th>Result</th>
-              <th>Status</th>
-              <th>Marksheet</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="liveResultsBody">
-          </tbody>
-        </table>
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>What Excel formats are supported?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              The tool supports standard Microsoft Excel formats: <code>.xlsx</code> (modern XML-based) and <code>.xls</code> (legacy binary format).
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>What happens if some student queries fail or time out?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              Failed records are clearly flagged in the live stream table with error reasons (e.g. Record Not Found, Timeout, or Alert). You can click the "Retry" button on individual students or use "Retry All Failed" without having to re-process the entire batch.
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question">
+              <span>Can this bypass university CAPTCHAs or firewalls?</span>
+              <span>▾</span>
+            </div>
+            <div class="faq-answer">
+              No. This application respects university website terms, access restrictions, rate limits, and security controls. It does not bypass authorization or anti-bot protections.
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- STEP 5: Export Results -->
-    <section class="step-card" id="step5-card" style="display: none;">
-      <div class="step-header">
-        <div class="step-number" style="background: var(--success);">5</div>
-        <div class="step-title">Export & Download Results</div>
-        <div class="step-desc">All files generated with dynamic formulas & preserved original data</div>
+
+    <!-- 6. VIEW: PRIVACY POLICY -->
+    <section class="page-view" id="view-privacy">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Privacy Policy</h1>
+          <div class="content-subtitle">Last updated: November 2026 &bull; SkillSum Innovations</div>
+        </div>
+        <div class="content-body">
+          <p>
+            This Privacy Policy accurately reflects the technical implementation of the <strong class="brand-text-name">Academic Result Processor</strong>, an independent utility provided by <strong>SkillSum Innovations</strong>.
+          </p>
+
+          <h2>1. Information Processed</h2>
+          <p>
+            The utility processes student academic identifiers provided directly by you, specifically:
+          </p>
+          <ul>
+            <li>Student Enrollment Numbers and Roll Numbers.</li>
+            <li>Dates of Birth (when required by the specific university result portal).</li>
+            <li>Student Names and Department/Branch information (if present in your input file).</li>
+            <li>Academic marks and evaluation statuses retrieved from publicly accessible result websites.</li>
+          </ul>
+
+          <h2>2. Browser-Side vs. Server-Side Data Flow</h2>
+          <p>
+            We strictly differentiate between data processed on your client machine and data transmitted to the backend processing service:
+          </p>
+          <ul>
+            <li><strong>Browser-Local Processing:</strong> Excel file reading, row counting, empty row detection, duplicate checks, and 10-row preview generation occur entirely inside your browser using client-side JavaScript. Your original Excel file is not transmitted to our servers for preview.</li>
+            <li><strong>Server-Side Processing:</strong> When you initiate bulk processing, the validated student identifiers (enrollment numbers and DOBs) are transmitted to the backend service to execute the automated portal query, CDP PDF marksheet generation, and OpenPyXL spreadsheet consolidation.</li>
+          </ul>
+
+          <h2>3. Temporary Storage & Automatic Deletion</h2>
+          <p>
+            Generated export files (Excel sheets, PDF marksheets, and ZIP archives) are stored in transient server directories outside public static document roots. An automated background cleaner enforces a strict <strong>30-minute Time-To-Live (TTL) retention policy</strong>. All session files are automatically purged from disk upon expiration. You may also click "Start New Batch" to request immediate cleanup.
+          </p>
+
+          <h2>4. Application Logging Practices</h2>
+          <p>
+            In compliance with privacy-by-design standards:
+          </p>
+          <ul>
+            <li>Server activity logs do not record student names, personal details, or academic marks.</li>
+            <li>Student roll numbers in activity feeds are privacy-masked (e.g. <code>...4001</code>).</li>
+            <li>We do not maintain a permanent database of student records.</li>
+          </ul>
+
+          <h2>5. Zero Tracking & Third-Party Analytics</h2>
+          <p>
+            This website does <strong>not</strong> include Google Analytics, Facebook Pixel, advertising trackers, cookie-based behavioral profiling, or external telemetry scripts.
+          </p>
+
+          <h2>6. Third-Party University Websites</h2>
+          <p>
+            When querying results, the application interacts directly with official university examination servers. Those third-party portals operate under their own independent privacy notices and terms.
+          </p>
+
+          <h2>7. Contact for Privacy Inquiries</h2>
+          <p>
+            For privacy inquiries, please contact SkillSum Innovations at <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span>.
+          </p>
+        </div>
       </div>
+    </section>
 
-      <div class="export-grid">
-        <div class="export-card">
-          <div>
-            <div class="export-card-title">📊 Consolidated Excel</div>
-            <div class="export-card-desc">Master spreadsheet containing all student records, totals, and percentages.</div>
-          </div>
-          <a id="btnDownloadConsolidated" href="#" class="btn btn-primary btn-sm" target="_blank">Download Excel (.xlsx)</a>
+
+    <!-- 7. VIEW: TERMS & CONDITIONS -->
+    <section class="page-view" id="view-terms">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Terms & Conditions</h1>
+          <div class="content-subtitle">Legal guidelines for using this open-source utility.</div>
         </div>
+        <div class="content-body">
+          <h2>1. Acceptance of Terms</h2>
+          <p>
+            By accessing or using the <strong class="brand-text-name">Academic Result Processor</strong> utility provided by <strong>SkillSum Innovations</strong>, you agree to be bound by these Terms & Conditions and all applicable laws.
+          </p>
 
-        <div class="export-card">
-          <div>
-            <div class="export-card-title">📑 Subject-Wise Sheets</div>
-            <div class="export-card-desc">Individual worksheet tab for each subject showing Theory, Practical & Sessional.</div>
-          </div>
-          <a id="btnDownloadSubjectWise" href="#" class="btn btn-primary btn-sm" target="_blank">Download Subject Excel</a>
-        </div>
+          <h2>2. Permitted Usage & Authorization</h2>
+          <p>
+            This utility is designed for college administrators, department heads, faculty coordinators, and authorized educational researchers to consolidate legitimately accessible examination results. You represent and warrant that:
+          </p>
+          <ul>
+            <li>You have proper authorization from your institution or students to process their academic roll numbers.</li>
+            <li>You will use the tool strictly in compliance with applicable educational data privacy regulations.</li>
+            <li>You will not use the service for abusive scraping, denial-of-service, or automated harassment of institutional web infrastructure.</li>
+          </ul>
 
-        <div class="export-card">
-          <div>
-            <div class="export-card-title">📂 Marksheets Archive</div>
-            <div class="export-card-desc">ZIP archive containing all downloaded student marksheet PDFs.</div>
-          </div>
-          <a id="btnDownloadMarksheetsZip" href="#" class="btn btn-secondary btn-sm" target="_blank">Download Marksheets (.zip)</a>
-        </div>
+          <h2>3. University Website Restrictions</h2>
+          <p>
+            Users must respect university website terms of service, robots.txt directives, rate limits, and access controls. This application does not authorize or support bypassing authentication gates, firewalls, or CAPTCHA verification challenges.
+          </p>
 
-        <div class="export-card" style="border-color: #93c5fd; background: #f0f7ff;">
-          <div>
-            <div class="export-card-title">📦 Complete Package</div>
-            <div class="export-card-desc">Complete bundle including Consolidated Excel, Subject Sheets, PDFs & Report.</div>
-          </div>
-          <a id="btnDownloadCompleteZip" href="#" class="btn btn-success btn-sm" target="_blank">Download Full Package (.zip)</a>
+          <h2>4. Accuracy Verification</h2>
+          <p>
+            All generated reports, totals, percentages, and marksheet PDFs are compiled from third-party university result pages. SkillSum Innovations does not guarantee the complete accuracy or uninterrupted availability of external portal data. You are solely responsible for verifying critical academic results against official university records.
+          </p>
+
+          <h2>5. Intellectual Property</h2>
+          <p>
+            The software code is licensed under the permissive MIT License. University names, portal logos, trademarks, and marksheet documents remain the exclusive intellectual property of their respective institutions.
+          </p>
+
+          <h2>6. Contact Information</h2>
+          <p>
+            For questions regarding these terms, contact SkillSum Innovations at <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span>.
+          </p>
         </div>
       </div>
+    </section>
 
-      <div style="margin-top: 1.5rem; text-align: right;">
-        <button class="btn btn-secondary" id="btnResetApp">Start New Batch</button>
+
+    <!-- 8. VIEW: DISCLAIMER -->
+    <section class="page-view" id="view-disclaimer">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Legal Disclaimer</h1>
+          <div class="content-subtitle">Important notices regarding affiliation and academic data accuracy.</div>
+        </div>
+        <div class="content-body">
+          <div class="callout-box warning">
+            <strong>Non-Affiliation Notice:</strong> The <span class="brand-text-name">Academic Result Processor</span> is an independent open-source software project developed and maintained by <strong>SkillSum Innovations</strong>.
+          </div>
+
+          <h2>1. No Official Endorsement or Affiliation</h2>
+          <p>
+            This utility is <strong>not</strong> affiliated with, endorsed by, sponsored by, or an official product of the Board of Technical Education Uttar Pradesh (BTEUP), any government ministry, or any university, college, examination board, or statutory educational council.
+          </p>
+
+          <h2>2. Ownership of Trademarks & Marks</h2>
+          <p>
+            All university names, examination board titles, department designations, and associated logos mentioned in this software or documentation are used strictly for nominative identification of supported portal connectors. All trademarks remain the property of their respective owners.
+          </p>
+
+          <h2>3. Provisional Nature of Results</h2>
+          <p>
+            Web-based examination marksheets published on institutional result portals are typically provisional in nature. Data extracted by this utility reflects the raw state published on target websites at the time of query. SkillSum Innovations accepts no liability for errors, omissions, server downtime, delayed updates, or discrepancies between web results and final signed university transcripts.
+          </p>
+
+          <h2>4. "As Is" Warranty Disclaimer</h2>
+          <p>
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 9. VIEW: DATA HANDLING & RETENTION -->
+    <section class="page-view" id="view-data-handling">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Data Handling & Retention Lifecycle</h1>
+          <div class="content-subtitle">Documenting the actual lifecycle of temporary files and memory caches.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            We believe in transparent engineering. Here is the exact data lifecycle implemented in the codebase:
+          </p>
+
+          <h2>1. Client-Side Parsing Phase</h2>
+          <ul>
+            <li><strong>Location:</strong> User web browser memory (RAM).</li>
+            <li><strong>Action:</strong> <code>xlsx.full.min.js</code> extracts row objects and column names.</li>
+            <li><strong>Persistence:</strong> Discarded immediately when you close or refresh the page. Never saved to local storage or server disk.</li>
+          </ul>
+
+          <h2>2. Transient Processing Session</h2>
+          <ul>
+            <li><strong>Location:</strong> Server temporary folder (<code>temp_storage/{job_id}/</code>).</li>
+            <li><strong>Contents:</strong> Headless Chromium CDP generated marksheet PDFs (<code>marksheets/*.pdf</code>) and exported Excel workbooks (<code>exports/*.xlsx</code>, <code>exports/*.zip</code>).</li>
+            <li><strong>Access Protection:</strong> Stored outside public static web roots; accessible only via validated session IDs (<code>job_id</code> sanitization guards against path traversal).</li>
+          </ul>
+
+          <h2>3. 30-Minute Automatic Purge (TTL)</h2>
+          <ul>
+            <li><strong>Implementation:</strong> The backend <code>BatchProcessor</code> runs an active background daemon thread (<code>_retention_cleaner_loop</code>) every 60 seconds.</li>
+            <li><strong>Policy:</strong> Any session directory older than 30 minutes (<code>JOB_RETENTION_MINUTES = 30</code>) is completely deleted using <code>shutil.rmtree</code>.</li>
+            <li><strong>Manual Trigger:</strong> Users can release their storage immediately by clicking "Start New Batch" or triggering <code>DELETE /api/cleanup/{job_id}</code>.</li>
+          </ul>
+
+          <h2>4. Database Status</h2>
+          <p>
+            The application operates with <strong>zero persistent database servers</strong> (no SQLite, PostgreSQL, MongoDB, or MySQL). All job state exists in active memory and volatile temporary directories during processing.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 10. VIEW: COPYRIGHT / TAKEDOWN POLICY -->
+    <section class="page-view" id="view-copyright">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Copyright & Takedown Policy</h1>
+          <div class="content-subtitle">Notice and procedure for intellectual property claims.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            <strong>SkillSum Innovations</strong> respects the intellectual property rights of institutions, organizations, and software authors.
+          </p>
+
+          <h2>Open-Source Codebase Copyright</h2>
+          <p>
+            The source code of the <span class="brand-text-name">Academic Result Processor</span> is copyrighted by SkillSum Innovations and open-source contributors, published under the open-source MIT License.
+          </p>
+
+          <h2>Notice and Takedown Procedure</h2>
+          <p>
+            If you are a university representative, examination board official, or copyright owner and believe that any connector, documentation, or code in this repository infringes upon your rights, please send a formal takedown request containing:
+          </p>
+          <ol>
+            <li>Identification of the copyrighted work or trademark claimed to be infringed.</li>
+            <li>Specific URL or file path in the repository where the alleged material is located.</li>
+            <li>Your contact information including name, institutional organization, and professional email address.</li>
+            <li>A statement that you have a good-faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law.</li>
+            <li>A statement made under penalty of perjury that the information in your notification is accurate.</li>
+          </ol>
+
+          <p>
+            Send takedown notices directly to: <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span>. SkillSum Innovations will promptly review and take appropriate action, including connector adjustments or repository updates.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 11. VIEW: CONTACT & SUPPORT -->
+    <section class="page-view" id="view-contact">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Contact & Support</h1>
+          <div class="content-subtitle">Assistance, contributions, and project communication.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            The <span class="brand-text-name">Academic Result Processor</span> is maintained as an open-source community utility by <strong>SkillSum Innovations</strong>.
+          </p>
+
+          <h2>General Inquiries & Community Support</h2>
+          <p>
+            Because this is a completely free, open-source project without subscription fees or commercial ticketing staff:
+          </p>
+          <ul>
+            <li><strong>Official Support Contact:</strong> <span class="brand-text-support">[SUPPORT_EMAIL_PLACEHOLDER]</span></li>
+            <li><strong>Bug Reports & Feature Requests:</strong> Please submit issues or connector requests via our open-source code repository issue tracker.</li>
+            <li><strong>Contributing Connectors:</strong> Developers can submit pull requests to add new institutional connectors.</li>
+          </ul>
+
+          <div class="callout-box">
+            <strong>Institutional Security Contacts:</strong> If you are an IT security administrator for a university portal with feedback on rate limiting or connector behavior, please email us directly so we can configure appropriate polite throttling defaults.
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 12. VIEW: OPEN SOURCE / MIT LICENSE -->
+    <section class="page-view" id="view-license">
+      <div class="content-card">
+        <div class="content-header">
+          <h1 class="content-title">Open Source / MIT License</h1>
+          <div class="content-subtitle">Permissive open-source licensing terms.</div>
+        </div>
+        <div class="content-body">
+          <p>
+            This software is licensed under the terms of the <strong>MIT License</strong>.
+          </p>
+
+          <div style="background: var(--bg-subtle); border: 1px solid var(--border); padding: 1.5rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.85rem; line-height: 1.6; margin: 1.5rem 0;">
+            MIT License<br><br>
+            Copyright (c) 2026 SkillSum Innovations & Open Source Contributors<br><br>
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:<br><br>
+            The above copyright notice and this permission notice shall be included in all
+            copies or substantial portions of the Software.<br><br>
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            SOFTWARE.
+          </div>
+
+          <p>
+            You are free to inspect, run, modify, fork, and self-host this application within your college or university environment without royalties or recurring charges.
+          </p>
+        </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer -->
+  <!-- Responsive Footer with Comprehensive Links -->
   <footer>
-    <div class="footer-links">
-      <a href="https://github.com" target="_blank">Open Source Repository</a>
-      <a href="/api/download/sample-template">Sample Excel Template</a>
-      <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>
+    <div class="footer-container">
+      <div class="footer-col">
+        <h4 class="brand-text-name">Academic Result Processor</h4>
+        <p style="margin-bottom: 0.75rem;">
+          An independent, free and open-source bulk academic marksheet processing utility by <strong>SkillSum Innovations</strong>.
+        </p>
+        <span class="badge badge-success">MIT Licensed</span>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#home" data-nav="home">Home</a></li>
+          <li><a href="#process" data-nav="process">Process Results</a></li>
+          <li><a href="#how-it-works" data-nav="how-it-works">How It Works</a></li>
+          <li><a href="#universities" data-nav="universities">Supported Universities</a></li>
+          <li><a href="#faq" data-nav="faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal & Policy</h4>
+        <ul>
+          <li><a href="#privacy" data-nav="privacy">Privacy Policy</a></li>
+          <li><a href="#terms" data-nav="terms">Terms & Conditions</a></li>
+          <li><a href="#disclaimer" data-nav="disclaimer">Legal Disclaimer</a></li>
+          <li><a href="#data-handling" data-nav="data-handling">Data Retention</a></li>
+          <li><a href="#copyright" data-nav="copyright">Copyright Policy</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Support & Project</h4>
+        <ul>
+          <li><a href="#contact" data-nav="contact">Contact & Support</a></li>
+          <li><a href="#license" data-nav="license">MIT License</a></li>
+          <li><a href="/api/download/sample-template">Excel Template (.xlsx)</a></li>
+        </ul>
+      </div>
     </div>
-    <div>Universal Bulk Result Processing Engine &bull; Completely Free &bull; No User Accounts or Subscriptions</div>
+
+    <div class="footer-bottom">
+      <div>
+        &copy; 2026 SkillSum Innovations &bull; No login, accounts, tracking, or fees.
+      </div>
+      <div>
+        <a href="#privacy" data-nav="privacy" style="color: var(--text-muted); text-decoration: none;">Privacy</a> &bull; 
+        <a href="#terms" data-nav="terms" style="color: var(--text-muted); text-decoration: none;">Terms</a> &bull; 
+        <a href="#disclaimer" data-nav="disclaimer" style="color: var(--text-muted); text-decoration: none;">Disclaimer</a>
+      </div>
+    </div>
   </footer>
 
   <script src="/static/js/app.js"></script>

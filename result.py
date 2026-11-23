@@ -16,9 +16,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 # ------------------------------
 # Configuration
 # ------------------------------
-RESULT_URL = ""
-INPUT_FILE = ""
-RESULTS_DIR = "results"
+# Configuration
+# ------------------------------
+RESULT_URL = "https://result.bteexam.com/even/main/rollno.aspx"
+INPUT_FILE = "students.xlsx"
+RESULTS_DIR = "4thsemresult"
 
 # Accurate selectors on BTEUP page, plus generic fallbacks
 ENROLLMENT_SELECTORS = [

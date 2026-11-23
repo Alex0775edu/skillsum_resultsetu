@@ -1,6 +1,7 @@
 """
-Comprehensive Test Suite for Bulk Result Processing Web Application.
-Tests connectors, Excel parsing, bulk processing engine, export generation, and API endpoints.
+Comprehensive Test Suite for Bulk Result Processing Platform.
+Tests connectors, Excel parsing, bulk processing engine, export generation,
+SSRF guards, path traversal sanitization, and API endpoints.
 """
 import os
 import io
@@ -14,6 +15,7 @@ from connectors.registry import get_registry
 from engine.excel_parser import ExcelParser
 from engine.exporter import ResultExporter
 from engine.processor import get_batch_processor
+from engine.security import validate_university_url, sanitize_job_id
 from connectors.base import StudentResult, SubjectMarks
 
 
@@ -39,8 +41,8 @@ class TestResultProcessor(unittest.TestCase):
         self.assertTrue(res_demo["supported"])
         self.assertEqual(res_demo["connector_id"], "demo_university")
 
-        # Test Unsupported URL
-        res_unknown = registry.validate_url("https://random-unknown-college.org/results")
+        # Test Unsupported external URL
+        res_unknown = registry.validate_url("https://example.com/results")
         self.assertTrue(res_unknown["valid"])
         self.assertFalse(res_unknown["supported"])
         self.assertIn("No compatible connector found", res_unknown["message"])
@@ -196,6 +198,82 @@ class TestResultProcessor(unittest.TestCase):
 
         res_zip = self.client.get(f"/api/download/{job_id}/complete_zip")
         self.assertEqual(res_zip.status_code, 200)
+
+    def test_05_ssrf_and_security_guards(self):
+        """Verify SSRF protection on internal/loopback URLs and path traversal guards."""
+        # 1. Loopback URL rejection
+        safe, msg = validate_university_url("http://127.0.0.1:8080/admin")
+        self.assertFalse(safe)
+        self.assertIn("loopback", msg.lower())
+
+        safe_local, _ = validate_university_url("http://localhost:5000/api")
+        self.assertFalse(safe_local)
+
+        # 2. Metadata IP rejection
+        safe_meta, _ = validate_university_url("http://169.254.169.254/latest/meta-data")
+        self.assertFalse(safe_meta)
+
+        # 3. Non-http scheme rejection
+        safe_file, _ = validate_university_url("file:///etc/passwd")
+        self.assertFalse(safe_file)
+
+        # 4. Path traversal on job_id
+        with self.assertRaises(ValueError):
+            sanitize_job_id("../../etc/passwd")
+
+        with self.assertRaises(ValueError):
+            sanitize_job_id("")
+
+        self.assertEqual(sanitize_job_id("abc123_-"), "abc123_-")
+
+    def test_06_direct_client_parsed_bulk_processing(self):
+        """Test privacy-first /api/process/start_direct endpoint."""
+        direct_payload = {
+            "portal_url": "https://results.university.edu/semester/exam",
+            "connector_id": "demo_university",
+            "students": [
+                {"enrollment": "DIR2001", "name": "Direct Student 1", "dob": "01/01/2003"},
+                {"enrollment": "DIR2002", "name": "Direct Student 2", "dob": "02/02/2003"},
+            ],
+            "options": {
+                "include_all_subjects": True,
+                "include_totals": True,
+                "download_pdf": True
+            }
+        }
+        resp = self.client.post("/api/process/start_direct", json=direct_payload)
+        self.assertEqual(resp.status_code, 200)
+        job_id = resp.json()["job_id"]
+
+        for _ in range(15):
+            time.sleep(0.5)
+            status_resp = self.client.get(f"/api/process/status/{job_id}")
+            job_data = status_resp.json()["job"]
+            if job_data["status"] in ("completed", "failed"):
+                break
+
+        self.assertEqual(job_data["status"], "completed")
+        self.assertEqual(job_data["processed"], 2)
+        self.assertEqual(job_data["successful"], 2)
+
+    def test_07_config_branding_endpoint(self):
+        """Verify centralized branding context returned by /api/config."""
+        resp = self.client.get("/api/config")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()["config"]
+        self.assertEqual(data["owner_name"], "SkillSum Innovations")
+        self.assertIn("Academic Result", data["project_name"])
+        self.assertEqual(data["support_email"], "[SUPPORT_EMAIL_PLACEHOLDER]")
+        self.assertEqual(data["analytics_enabled"], False)
+
+    def test_08_file_size_limit_rejection(self):
+        """Verify files larger than 5MB are rejected with 413."""
+        oversized_data = b"0" * (6 * 1024 * 1024)  # 6 MB
+        resp = self.client.post(
+            "/api/upload",
+            files={"file": ("huge.xlsx", io.BytesIO(oversized_data), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
+        )
+        self.assertEqual(resp.status_code, 413)
 
 
 if __name__ == "__main__":

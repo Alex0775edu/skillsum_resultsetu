@@ -1,6 +1,7 @@
 """
 Bulk Result Processor Orchestrator.
-Manages background job queues, real-time progress events, retries, and export generation.
+Manages background job queues, privacy-conscious logging, automated TTL retention,
+and export generation.
 """
 import os
 import shutil
@@ -12,6 +13,8 @@ from typing import Dict, List, Any, Optional
 
 from connectors.base import BaseConnector, StudentResult
 from connectors.registry import get_registry
+from brand_config import JOB_RETENTION_MINUTES
+from engine.security import sanitize_job_id
 from .exporter import ResultExporter
 
 
@@ -27,7 +30,7 @@ class ProcessingJob:
         options: Dict[str, Any],
         storage_dir: str
     ):
-        self.job_id = job_id
+        self.job_id = sanitize_job_id(job_id)
         self.portal_url = portal_url
         self.connector_id = connector_id
         self.students = students
@@ -39,20 +42,20 @@ class ProcessingJob:
         os.makedirs(self.pdf_dir, exist_ok=True)
         os.makedirs(self.exports_dir, exist_ok=True)
 
-        self.status = "queued"  # queued, running, completed, cancelled
+        self.status = "queued"  # queued, running, completed, cancelled, expired
+        self.created_at = time.time()
         self.total = len(students)
         self.processed = 0
         self.successful = 0
         self.failed = 0
         self.skipped = 0
-        self.current_student = ""
+        self.current_display = ""
         self.start_time: Optional[float] = None
         self.end_time: Optional[float] = None
         self.logs: List[str] = []
 
         # Store results keyed by enrollment
         self.results: Dict[str, StudentResult] = {}
-        # Prepopulate pending results
         for s in students:
             enr = s.get("enrollment", "")
             self.results[enr] = StudentResult(
@@ -69,6 +72,7 @@ class ProcessingJob:
         }
 
     def add_log(self, message: str) -> None:
+        """Add timestamped privacy-safe activity log message."""
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.logs.append(f"[{timestamp}] {message}")
         if len(self.logs) > 500:
@@ -98,7 +102,7 @@ class ProcessingJob:
             "skipped": self.skipped,
             "percent": self.get_progress_percent(),
             "elapsed_seconds": self.get_elapsed_seconds(),
-            "current_student": self.current_student,
+            "current_display": self.current_display,
             "recent_logs": self.logs[-15:],
             "results": [r.to_dict() for r in self.results.values()],
             "files": {
@@ -108,13 +112,32 @@ class ProcessingJob:
 
 
 class BatchProcessor:
-    """Manages active bulk processing jobs and background threads."""
+    """Manages bulk processing jobs, worker threads, and automatic temporary file cleanup."""
 
     def __init__(self, base_storage_dir: str = "temp_storage"):
         self.base_storage_dir = base_storage_dir
         os.makedirs(self.base_storage_dir, exist_ok=True)
         self.jobs: Dict[str, ProcessingJob] = {}
         self._lock = threading.Lock()
+
+        # Start background automatic TTL cleaner
+        self._cleaner_thread = threading.Thread(target=self._retention_cleaner_loop, daemon=True)
+        self._cleaner_thread.start()
+
+    def _retention_cleaner_loop(self) -> None:
+        """Periodically purge temporary job files older than JOB_RETENTION_MINUTES."""
+        retention_seconds = JOB_RETENTION_MINUTES * 60
+        while True:
+            time.sleep(60)  # Check every minute
+            now = time.time()
+            expired_ids = []
+            with self._lock:
+                for jid, job in self.jobs.items():
+                    if (now - job.created_at) > retention_seconds:
+                        expired_ids.append(jid)
+
+            for jid in expired_ids:
+                self.cleanup_job(jid)
 
     def create_job(
         self,
@@ -123,7 +146,8 @@ class BatchProcessor:
         students: List[Dict[str, Any]],
         options: Dict[str, Any]
     ) -> ProcessingJob:
-        job_id = str(uuid.uuid4())[:8]
+        raw_id = str(uuid.uuid4())[:8]
+        job_id = sanitize_job_id(raw_id)
         job_dir = os.path.join(self.base_storage_dir, job_id)
         job = ProcessingJob(job_id, portal_url, connector_id, students, options, job_dir)
 
@@ -133,8 +157,12 @@ class BatchProcessor:
         return job
 
     def get_job(self, job_id: str) -> Optional[ProcessingJob]:
+        try:
+            clean_id = sanitize_job_id(job_id)
+        except Exception:
+            return None
         with self._lock:
-            return self.jobs.get(job_id)
+            return self.jobs.get(clean_id)
 
     def start_job(self, job_id: str) -> bool:
         job = self.get_job(job_id)
@@ -149,6 +177,14 @@ class BatchProcessor:
         worker_thread.start()
         return True
 
+    @staticmethod
+    def _mask_id(identifier: str) -> str:
+        """Privacy mask for student enrollment numbers in activity logs."""
+        clean = str(identifier).strip()
+        if len(clean) <= 4:
+            return f"***{clean}"
+        return f"...{clean[-4:]}"
+
     def retry_single(self, job_id: str, enrollment: str) -> bool:
         """Retry processing for a single failed student."""
         job = self.get_job(job_id)
@@ -161,7 +197,8 @@ class BatchProcessor:
 
         def _retry_worker():
             job.status = "running"
-            job.add_log(f"Retrying student enrollment: {enrollment}")
+            masked = self._mask_id(enrollment)
+            job.add_log(f"Retrying single student record ({masked})")
             registry = get_registry()
             connector = registry.get_by_id(job.connector_id)
             if not connector:
@@ -171,7 +208,6 @@ class BatchProcessor:
 
             try:
                 connector.initialize()
-                # Force download on retry
                 retry_options = dict(job.options)
                 retry_options["force_download"] = True
 
@@ -186,12 +222,11 @@ class BatchProcessor:
                 job.results[enrollment] = res
                 if res.status in ("Success", "Cached"):
                     job.successful += 1
-                    job.add_log(f"Retry SUCCEEDED for {enrollment}")
+                    job.add_log(f"Retry succeeded for record ({masked})")
                 else:
                     job.failed += 1
-                    job.add_log(f"Retry FAILED for {enrollment}: {res.error_message}")
+                    job.add_log(f"Retry failed for record ({masked}): {res.error_message}")
 
-                # Regenerate export files with updated data
                 self._generate_exports(job)
             except Exception as e:
                 job.add_log(f"Error during retry: {str(e)}")
@@ -232,10 +267,11 @@ class BatchProcessor:
                 retry_options = dict(job.options)
                 retry_options["force_download"] = True
 
-                for s in failed_students:
+                for idx, s in enumerate(failed_students, 1):
                     enr = s.get("enrollment", "")
-                    job.current_student = enr
-                    job.add_log(f"Retrying {enr}...")
+                    masked = self._mask_id(enr)
+                    job.current_display = f"Retry [{idx}/{len(failed_students)}] ({masked})"
+                    job.add_log(f"Retrying record [{idx}/{len(failed_students)}] ({masked})...")
 
                     res = connector.fetch_result(
                         job.portal_url, s, retry_options, job.pdf_dir
@@ -248,10 +284,10 @@ class BatchProcessor:
                     job.results[enr] = res
                     if res.status in ("Success", "Cached"):
                         job.successful += 1
-                        job.add_log(f"Retry SUCCESS for {enr}")
+                        job.add_log(f"Retry success for record ({masked})")
                     else:
                         job.failed += 1
-                        job.add_log(f"Retry FAILED for {enr}: {res.error_message}")
+                        job.add_log(f"Retry unsuccessful for record ({masked}): {res.error_message}")
 
                     time.sleep(0.3)
 
@@ -260,7 +296,7 @@ class BatchProcessor:
                 job.add_log(f"Exception during bulk retry: {str(e)}")
             finally:
                 connector.cleanup()
-                job.current_student = ""
+                job.current_display = ""
                 job.status = "completed"
                 job.add_log("Bulk retry operation completed.")
 
@@ -268,10 +304,10 @@ class BatchProcessor:
         return True
 
     def _run_job_worker(self, job: ProcessingJob) -> None:
-        """Main bulk processing loop."""
+        """Main bulk processing loop with privacy-safe activity logging."""
         job.status = "running"
         job.start_time = time.time()
-        job.add_log(f"Bulk processing started. Total records: {job.total}")
+        job.add_log(f"Bulk processing started. Total student records: {job.total}")
 
         registry = get_registry()
         connector = registry.get_by_id(job.connector_id)
@@ -282,13 +318,13 @@ class BatchProcessor:
 
         try:
             connector.initialize()
-            job.add_log(f"Initialized connector: {connector.name}")
+            job.add_log(f"Connected to portal handler: {connector.name}")
 
             for idx, student in enumerate(job.students, 1):
                 enrollment = student.get("enrollment", "")
-                name = student.get("name", "")
-                job.current_student = f"{enrollment} ({name})" if name else enrollment
-                job.add_log(f"Processing [{idx}/{job.total}]: {job.current_student}")
+                masked = self._mask_id(enrollment)
+                job.current_display = f"Record [{idx}/{job.total}] ({masked})"
+                job.add_log(f"Processing record [{idx}/{job.total}] ({masked})...")
 
                 try:
                     res = connector.fetch_result(
@@ -303,28 +339,27 @@ class BatchProcessor:
 
                     if res.status in ("Success", "Cached"):
                         job.successful += 1
-                        name_display = f" ({res.student_name})" if res.student_name else ""
-                        job.add_log(f"Result extracted successfully for {enrollment}{name_display}")
+                        job.add_log(f"Record [{idx}/{job.total}] extracted successfully")
                     elif res.status == "Skipped":
                         job.skipped += 1
-                        job.add_log(f"Skipped {enrollment}: {res.error_message}")
+                        job.add_log(f"Record [{idx}/{job.total}] skipped: {res.error_message}")
                     else:
                         job.failed += 1
-                        job.add_log(f"Failed {enrollment}: {res.error_message}")
+                        job.add_log(f"Record [{idx}/{job.total}] failed: {res.error_message}")
 
                 except Exception as ex:
                     job.processed += 1
                     job.failed += 1
                     err_res = StudentResult(
                         enrollment=enrollment,
-                        student_name=name,
+                        student_name=student.get("name", ""),
                         status="Failed",
                         error_message=f"Processing exception: {str(ex)[:100]}"
                     )
                     job.results[enrollment] = err_res
-                    job.add_log(f"Exception for {enrollment}: {str(ex)}")
+                    job.add_log(f"Exception on record [{idx}/{job.total}]: {str(ex)[:80]}")
 
-                # Small polite delay between requests
+                # Polite delay between requests to respect university servers
                 time.sleep(0.4)
 
         except Exception as e:
@@ -332,7 +367,7 @@ class BatchProcessor:
         finally:
             connector.cleanup()
             job.end_time = time.time()
-            job.current_student = ""
+            job.current_display = ""
             job.status = "completed"
             job.add_log(
                 f"Job finished in {job.get_elapsed_seconds()}s. "
@@ -344,7 +379,7 @@ class BatchProcessor:
                 self._generate_exports(job)
                 job.add_log("Export packages generated successfully.")
             except Exception as exp_err:
-                job.add_log(f"Export generation error: {str(exp_err)}")
+                job.add_log(f"Export generation notice: {str(exp_err)}")
 
     def _generate_exports(self, job: ProcessingJob) -> None:
         """Create Excel sheets, PDF marksheets ZIP, and Complete Package ZIP."""
@@ -394,9 +429,13 @@ class BatchProcessor:
         job.generated_files["complete_zip"] = zip_complete
 
     def cleanup_job(self, job_id: str) -> bool:
-        """Delete temporary files for a completed or aborted job."""
+        """Delete temporary files for a completed or expired job."""
+        try:
+            clean_id = sanitize_job_id(job_id)
+        except Exception:
+            return False
         with self._lock:
-            job = self.jobs.pop(job_id, None)
+            job = self.jobs.pop(clean_id, None)
             if job and os.path.exists(job.storage_dir):
                 shutil.rmtree(job.storage_dir, ignore_errors=True)
                 return True

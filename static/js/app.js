@@ -1,15 +1,23 @@
-// Frontend Application Logic for Universal Bulk Result Processor
+// Universal Bulk Academic Result Processor - SkillSum Innovations
+// Privacy-First Browser-Local Parsing & Responsive Multi-Page Navigation
 
 document.addEventListener("DOMContentLoaded", () => {
   // State variables
   let currentConnectorId = "bteup";
-  let currentUploadId = null;
   let currentJobId = null;
   let pollInterval = null;
-  let detectedMapping = {};
-  let uploadedColumns = [];
+  let clientParsedStudents = null; // Stored in browser memory
+  let serverUploadId = null;        // Fallback upload ID
+  let brandConfig = {};
 
-  // DOM Elements
+  // DOM Elements - Navigation & Shell
+  const navLinks = document.querySelectorAll(".nav-link[data-nav]");
+  const allNavTriggers = document.querySelectorAll("[data-nav]");
+  const pageViews = document.querySelectorAll(".page-view");
+  const mobileNavToggle = document.getElementById("mobileNavToggle");
+  const navLinksContainer = document.getElementById("navLinks");
+
+  // DOM Elements - Process Page Workflow
   const portalUrlInput = document.getElementById("portalUrl");
   const btnValidateUrl = document.getElementById("btnValidateUrl");
   const portalStatusBox = document.getElementById("portalStatusBox");
@@ -50,17 +58,123 @@ document.addEventListener("DOMContentLoaded", () => {
   const liveResultsBody = document.getElementById("liveResultsBody");
   const btnRetryFailed = document.getElementById("btnRetryFailed");
 
-  // Export Links
+  // Export Download Links
   const btnDownloadConsolidated = document.getElementById("btnDownloadConsolidated");
   const btnDownloadSubjectWise = document.getElementById("btnDownloadSubjectWise");
   const btnDownloadMarksheetsZip = document.getElementById("btnDownloadMarksheetsZip");
   const btnDownloadCompleteZip = document.getElementById("btnDownloadCompleteZip");
   const btnResetApp = document.getElementById("btnResetApp");
 
-  // 1. Initial URL validation on page load
+  // Column synonyms for client-side auto-detection
+  const COLUMN_SYNONYMS = {
+    enrollment: [
+      "enrollment_number", "enrollment", "enrolment", "enrollmentno",
+      "enrollment no", "enrolment no", "roll", "rollno", "roll no",
+      "roll number", "registration", "reg no", "regno", "studentid",
+      "student id", "enr", "enrno", "enr no", "enrollment_num", "roll_num", "seat_no"
+    ],
+    dob: [
+      "date_of_birth", "dob", "date of birth", "birthdate", "birth date",
+      "birth", "dateofbirth", "d_o_b"
+    ],
+    name: [
+      "name", "student name", "student_name", "candidate name",
+      "candidate_name", "student", "full_name"
+    ]
+  };
+
+  function normalize(str) {
+    return String(str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  // --- 1. Client-Side Page Router ---
+  function navigateTo(targetViewId) {
+    const validViews = [
+      "home", "process", "how-it-works", "universities",
+      "faq", "privacy", "terms", "disclaimer", "data-handling",
+      "copyright", "contact", "license"
+    ];
+
+    const cleanTarget = validViews.includes(targetViewId) ? targetViewId : "home";
+
+    // Toggle active view
+    pageViews.forEach(view => {
+      if (view.id === `view-${cleanTarget}`) {
+        view.classList.add("active");
+      } else {
+        view.classList.remove("active");
+      }
+    });
+
+    // Update nav links active state
+    navLinks.forEach(link => {
+      if (link.getAttribute("data-nav") === cleanTarget) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+
+    // Close mobile nav if open
+    navLinksContainer.classList.remove("open");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Bind click handlers to all navigation triggers
+  allNavTriggers.forEach(el => {
+    el.addEventListener("click", e => {
+      const target = el.getAttribute("data-nav");
+      if (target) {
+        e.preventDefault();
+        window.location.hash = target;
+        navigateTo(target);
+      }
+    });
+  });
+
+  window.addEventListener("hashchange", () => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash) navigateTo(hash);
+  });
+
+  mobileNavToggle.addEventListener("click", () => {
+    navLinksContainer.classList.toggle("open");
+  });
+
+  // Read initial hash on load
+  const initialHash = window.location.hash.replace("#", "") || "home";
+  navigateTo(initialHash);
+
+
+  // --- 2. Load Central Branding Configuration ---
+  async function loadBrandingConfig() {
+    try {
+      const res = await fetch("/api/config");
+      const data = await res.json();
+      if (data.success && data.config) {
+        brandConfig = data.config;
+
+        // Populate branding text across all pages
+        document.querySelectorAll(".brand-text-name").forEach(el => {
+          el.textContent = brandConfig.project_name || "Academic Result Processor";
+        });
+        document.querySelectorAll(".brand-text-tagline").forEach(el => {
+          el.textContent = brandConfig.tagline || "Simplify bulk academic result processing.";
+        });
+        document.querySelectorAll(".brand-text-support").forEach(el => {
+          el.textContent = brandConfig.support_email || "[SUPPORT_EMAIL_PLACEHOLDER]";
+        });
+      }
+    } catch (e) {
+      console.warn("Notice: Using local default branding settings.");
+    }
+  }
+  loadBrandingConfig();
+
+
+  // --- 3. Portal Validation ---
   validatePortalUrl(portalUrlInput.value);
 
-  // Quick select pills
   document.querySelectorAll(".btn-pill").forEach(pill => {
     pill.addEventListener("click", () => {
       portalUrlInput.value = pill.getAttribute("data-url");
@@ -73,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function validatePortalUrl(url) {
-    if (!url.trim()) return;
+    if (!url || !url.trim()) return;
     try {
       const res = await fetch("/api/portals/validate", {
         method: "POST",
@@ -103,18 +217,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 2. Drag & Drop / File Upload
+
+  // --- 4. Privacy-First Browser-Local Excel Parsing ---
   dropzone.addEventListener("click", () => fileInput.click());
 
-  ["dragenter", "dragover"].forEach(eventName => {
-    dropzone.addEventListener(eventName, e => {
+  ["dragenter", "dragover"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
       e.preventDefault();
       dropzone.classList.add("dragover");
     });
   });
 
-  ["dragleave", "drop"].forEach(eventName => {
-    dropzone.addEventListener(eventName, e => {
+  ["dragleave", "drop"].forEach(evt => {
+    dropzone.addEventListener(evt, e => {
       e.preventDefault();
       dropzone.classList.remove("dragover");
     });
@@ -122,22 +237,112 @@ document.addEventListener("DOMContentLoaded", () => {
 
   dropzone.addEventListener("drop", e => {
     const files = e.dataTransfer.files;
-    if (files.length) handleFileUpload(files[0]);
+    if (files.length) processExcelFile(files[0]);
   });
 
   fileInput.addEventListener("change", e => {
-    if (e.target.files.length) handleFileUpload(e.target.files[0]);
+    if (e.target.files.length) processExcelFile(e.target.files[0]);
   });
 
-  async function handleFileUpload(file) {
+  async function processExcelFile(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     if (!["xlsx", "xls"].includes(ext)) {
-      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      alert("Please upload a valid Excel spreadsheet (.xlsx or .xls)");
       return;
     }
 
-    dropzone.innerHTML = `<div class="upload-text">Uploading & analyzing <strong>${file.name}</strong>...</div>`;
+    dropzone.innerHTML = `<div class="upload-text">Reading & validating <strong>${file.name}</strong> locally...</div>`;
 
+    // Attempt Privacy-First Client-Side Parsing
+    if (window.XLSX) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: true });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rawJson = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (!rawJson || rawJson.length === 0) {
+          throw new Error("Excel sheet contains no data rows.");
+        }
+
+        const columns = Object.keys(rawJson[0]);
+
+        // Auto-detect columns
+        const detected = { enrollment: null, dob: null, name: null };
+        const normCols = {};
+        columns.forEach(c => normCols[normalize(c)] = c);
+
+        for (const [key, synList] of Object.entries(COLUMN_SYNONYMS)) {
+          for (const syn of synList) {
+            const nSyn = normalize(syn);
+            if (normCols[nSyn]) {
+              detected[key] = normCols[nSyn];
+              break;
+            }
+          }
+        }
+
+        // Store client parsed data
+        clientParsedStudents = {
+          filename: file.name,
+          columns: columns,
+          detectedMapping: detected,
+          rows: rawJson
+        };
+        serverUploadId = null; // Clear server upload ID
+
+        // Update statistics
+        const enrollmentCol = detected.enrollment || columns[0];
+        let emptyCount = 0;
+        let dupCount = 0;
+        const seen = new Set();
+
+        rawJson.forEach(row => {
+          const val = String(row[enrollmentCol] || "").trim();
+          if (!val) {
+            emptyCount++;
+          } else if (seen.has(val)) {
+            dupCount++;
+          } else {
+            seen.add(val);
+          }
+        });
+
+        statTotalRows.textContent = rawJson.length;
+        statValidRows.textContent = seen.size;
+        statDuplicateRows.textContent = dupCount;
+        statEmptyRows.textContent = emptyCount;
+
+        // Populate column dropdowns
+        populateColumnSelect(mapEnrollment, columns, detected.enrollment, true);
+        populateColumnSelect(mapDob, columns, detected.dob, false);
+        populateColumnSelect(mapName, columns, detected.name, false);
+
+        // Render preview table
+        renderPreviewTable(columns, rawJson.slice(0, 10));
+        previewNotice.textContent = `Showing first ${Math.min(10, rawJson.length)} rows (parsed 100% locally in browser)`;
+
+        dropzone.innerHTML = `
+          <div class="upload-icon" style="color: var(--success);">✓</div>
+          <div class="upload-text"><strong>${file.name}</strong> loaded locally</div>
+          <div class="upload-hint">Original file remains on your device &bull; Click to replace</div>
+          <div><span class="privacy-badge-local">🔒 Client-Side Local Parsing Complete</span></div>
+        `;
+
+        uploadAnalysisPanel.style.display = "block";
+        return;
+
+      } catch (err) {
+        console.warn("Client-side Excel parsing fallback to server API:", err);
+      }
+    }
+
+    // Fallback: Server-side upload API
+    await uploadFileToServer(file);
+  }
+
+  async function uploadFileToServer(file) {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -149,39 +354,34 @@ document.addEventListener("DOMContentLoaded", () => {
       const resData = await res.json();
 
       if (!res.ok || !resData.success) {
-        throw new Error(resData.detail || "Upload failed");
+        throw new Error(resData.detail || "Server upload failed");
       }
 
       const d = resData.data;
-      currentUploadId = d.upload_id;
-      uploadedColumns = d.columns;
-      detectedMapping = d.detected_mapping;
+      serverUploadId = d.upload_id;
+      clientParsedStudents = null;
 
-      // Update dropzone UI
       dropzone.innerHTML = `
         <div class="upload-icon" style="color: var(--success);">✓</div>
-        <div class="upload-text"><strong>${d.filename}</strong> uploaded successfully</div>
+        <div class="upload-text"><strong>${d.filename}</strong> verified</div>
         <div class="upload-hint">Click or drop another file to replace</div>
       `;
 
-      // Show stats
       statTotalRows.textContent = d.total_rows;
       statValidRows.textContent = d.valid_count;
       statDuplicateRows.textContent = d.duplicate_count;
       statEmptyRows.textContent = d.empty_count;
 
-      // Populate column selectors
-      populateColumnSelect(mapEnrollment, d.columns, detectedMapping.enrollment, true);
-      populateColumnSelect(mapDob, d.columns, detectedMapping.dob, false);
-      populateColumnSelect(mapName, d.columns, detectedMapping.name, false);
+      populateColumnSelect(mapEnrollment, d.columns, d.detected_mapping.enrollment, true);
+      populateColumnSelect(mapDob, d.columns, d.detected_mapping.dob, false);
+      populateColumnSelect(mapName, d.columns, d.detected_mapping.name, false);
 
-      // Render Preview Table
       renderPreviewTable(d.columns, d.preview_records);
-      previewNotice.textContent = `Showing ${d.preview_records.length} sample rows`;
+      previewNotice.textContent = `Showing first ${d.preview_records.length} sample rows`;
 
       uploadAnalysisPanel.style.display = "block";
     } catch (err) {
-      alert("Error parsing Excel file: " + err.message);
+      alert("Error reading Excel spreadsheet: " + err.message);
       dropzone.innerHTML = `
         <div class="upload-icon">📄</div>
         <div class="upload-text">Drag & drop your Excel file here, or click to browse</div>
@@ -194,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!required) {
       const opt = document.createElement("option");
       opt.value = "";
-      opt.textContent = "-- Not in Excel / Optional --";
+      opt.textContent = "-- Not in File / Optional --";
       selectElem.appendChild(opt);
     }
     columns.forEach(col => {
@@ -212,44 +412,46 @@ document.addEventListener("DOMContentLoaded", () => {
     previewTableHead.innerHTML = "";
     previewTableBody.innerHTML = "";
 
-    // Headers
     columns.forEach(c => {
       const th = document.createElement("th");
       th.textContent = c;
       previewTableHead.appendChild(th);
     });
 
-    // Rows
     rows.forEach(r => {
       const tr = document.createElement("tr");
       columns.forEach(c => {
         const td = document.createElement("td");
-        td.textContent = r[c] || "-";
+        let val = r[c];
+        if (val instanceof Date) {
+          val = val.toLocaleDateString("en-GB");
+        }
+        td.textContent = (val !== undefined && val !== null && val !== "") ? val : "-";
         tr.appendChild(td);
       });
       previewTableBody.appendChild(tr);
     });
   }
 
-  // 3. Start Bulk Processing
+
+  // --- 5. Start Bulk Processing ---
   btnStartBulk.addEventListener("click", async () => {
-    if (!currentUploadId) {
-      alert("Please upload an Excel file in Step 2 before starting processing.");
+    if (!clientParsedStudents && !serverUploadId) {
+      alert("Please upload a student Excel file in Step 2 before starting processing.");
       return;
     }
 
     if (!mapEnrollment.value) {
-      alert("Please map the Enrollment / Roll Number column.");
+      alert("Please select the Enrollment Number / Roll Number column.");
       return;
     }
 
     const portalUrl = portalUrlInput.value.trim();
     if (!portalUrl) {
-      alert("Please enter a Result Portal URL in Step 1.");
+      alert("Please provide a valid Result Portal URL in Step 1.");
       return;
     }
 
-    // Extraction Options
     const options = {
       include_all_subjects: document.getElementById("optAllSubjects").checked,
       include_theory: document.getElementById("optTheory").checked,
@@ -263,49 +465,103 @@ document.addEventListener("DOMContentLoaded", () => {
       force_download: document.getElementById("optForceDownload").checked,
     };
 
-    const columnMapping = {
-      enrollment: mapEnrollment.value,
-      dob: mapDob.value,
-      name: mapName.value,
-    };
-
     btnStartBulk.disabled = true;
-    btnStartBulk.textContent = "Initiating Bulk Processing...";
+    btnStartBulk.textContent = "Starting Bulk Processing...";
 
     try {
-      const res = await fetch("/api/process/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          upload_id: currentUploadId,
-          portal_url: portalUrl,
-          connector_id: currentConnectorId || "bteup",
-          column_mapping: columnMapping,
-          options: options
-        })
-      });
+      let res, data;
 
-      const data = await res.json();
+      // Primary Privacy-First Path: Client-Side Parsed Data
+      if (clientParsedStudents) {
+        const enrCol = mapEnrollment.value;
+        const dobCol = mapDob.value;
+        const nameCol = mapName.value;
+
+        // Build clean student query payload with deduplication
+        const studentPayload = [];
+        const seenEnr = new Set();
+
+        clientParsedStudents.rows.forEach(r => {
+          let enrVal = String(r[enrCol] || "").trim();
+          if (enrVal.endsWith(".0")) enrVal = enrVal.slice(0, -2); // Handle Excel float conversions
+
+          if (!enrVal || seenEnr.has(enrVal)) return;
+          seenEnr.add(enrVal);
+
+          let dobVal = "";
+          if (dobCol && r[dobCol]) {
+            const raw = r[dobCol];
+            if (raw instanceof Date) {
+              const d = String(raw.getDate()).padStart(2, '0');
+              const m = String(raw.getMonth() + 1).padStart(2, '0');
+              const y = raw.getFullYear();
+              dobVal = `${d}/${m}/${y}`;
+            } else {
+              dobVal = String(raw).trim();
+            }
+          }
+
+          let nameVal = nameCol && r[nameCol] ? String(r[nameCol]).trim() : "";
+
+          studentPayload.push({
+            enrollment: enrVal,
+            dob: dobVal,
+            name: nameVal
+          });
+        });
+
+        res = await fetch("/api/process/start_direct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            portal_url: portalUrl,
+            connector_id: currentConnectorId || "bteup",
+            students: studentPayload,
+            options: options
+          })
+        });
+
+      } else {
+        // Fallback Server Upload Path
+        res = await fetch("/api/process/start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            upload_id: serverUploadId,
+            portal_url: portalUrl,
+            connector_id: currentConnectorId || "bteup",
+            column_mapping: {
+              enrollment: mapEnrollment.value,
+              dob: mapDob.value,
+              name: mapName.value
+            },
+            options: options
+          })
+        });
+      }
+
+      data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.detail || "Failed to start bulk job");
+        throw new Error(data.detail || "Unable to initiate processing session.");
       }
 
       currentJobId = data.job_id;
 
-      // Reveal Step 4 & scroll into view
+      // Reveal Step 4 & scroll
       step4Card.style.display = "block";
       step4Card.scrollIntoView({ behavior: "smooth" });
 
       startStatusPolling(currentJobId);
 
     } catch (err) {
-      alert("Could not start processing: " + err.message);
+      alert("Processing error: " + err.message);
       btnStartBulk.disabled = false;
       btnStartBulk.textContent = "▶ Start Bulk Processing";
     }
   });
 
-  // 4. Status Polling & Real-time Live Updates
+
+  // --- 6. Live Status Polling & Results Table ---
   function startStatusPolling(jobId) {
     if (pollInterval) clearInterval(pollInterval);
 
@@ -317,7 +573,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         const job = data.job;
 
-        // Progress bar & metrics
         progressBar.style.width = `${job.percent}%`;
         progressPercentage.textContent = `${job.percent}%`;
         currentStatusBadge.textContent = job.status.toUpperCase();
@@ -335,7 +590,7 @@ document.addEventListener("DOMContentLoaded", () => {
         metricFailed.textContent = job.failed;
         metricSkipped.textContent = job.skipped;
 
-        // Logs terminal
+        // Privacy-masked Activity Log Terminal
         logTerminal.innerHTML = "";
         job.recent_logs.forEach(msg => {
           const d = document.createElement("div");
@@ -344,17 +599,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         logTerminal.scrollTop = logTerminal.scrollHeight;
 
-        // Live Results Table
         renderLiveResults(job.results);
 
-        // Show Retry All Failed button if there are failures
         if (job.failed > 0 && job.status === "completed") {
           btnRetryFailed.style.display = "inline-flex";
         } else {
           btnRetryFailed.style.display = "none";
         }
 
-        // When complete
         if (job.status === "completed" || job.status === "failed") {
           clearInterval(pollInterval);
           btnStartBulk.disabled = false;
@@ -375,7 +627,6 @@ document.addEventListener("DOMContentLoaded", () => {
     results.forEach((r, idx) => {
       const tr = document.createElement("tr");
 
-      // Evaluation status badge
       let statusBadge = `<span class="badge badge-gray">${r.status}</span>`;
       if (r.status === "Success" || r.status === "Cached") {
         statusBadge = `<span class="badge badge-success">${r.status}</span>`;
@@ -385,13 +636,11 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBadge = `<span class="badge badge-warn" title="${r.error_message}">Skipped</span>`;
       }
 
-      // Marksheet action
       let pdfCell = "-";
       if (r.pdf_path) {
-        pdfCell = `<a href="/api/download/${currentJobId}/pdf?enrollment=${encodeURIComponent(r.enrollment)}" target="_blank" class="btn btn-secondary btn-sm">View Marksheet</a>`;
+        pdfCell = `<a href="/api/download/${currentJobId}/pdf?enrollment=${encodeURIComponent(r.enrollment)}" target="_blank" class="btn btn-secondary btn-sm">View PDF</a>`;
       }
 
-      // Individual retry button
       let actionCell = "-";
       if (r.status === "Failed") {
         actionCell = `<button class="btn btn-secondary btn-sm btn-retry-single" data-enrollment="${r.enrollment}">🔄 Retry</button>`;
@@ -411,7 +660,6 @@ document.addEventListener("DOMContentLoaded", () => {
       liveResultsBody.appendChild(tr);
     });
 
-    // Attach retry listeners
     document.querySelectorAll(".btn-retry-single").forEach(btn => {
       btn.addEventListener("click", async () => {
         const enr = btn.getAttribute("data-enrollment");
@@ -421,27 +669,25 @@ document.addEventListener("DOMContentLoaded", () => {
           await fetch(`/api/process/retry/${currentJobId}/${encodeURIComponent(enr)}`, { method: "POST" });
           startStatusPolling(currentJobId);
         } catch (e) {
-          alert("Retry failed to launch: " + e.message);
+          alert("Retry launch failed: " + e.message);
         }
       });
     });
   }
 
-  // Retry all failed
   btnRetryFailed.addEventListener("click", async () => {
     btnRetryFailed.disabled = true;
-    btnRetryFailed.textContent = "Initiating retry...";
+    btnRetryFailed.textContent = "Retrying all...";
     try {
       await fetch(`/api/process/retry-failed/${currentJobId}`, { method: "POST" });
       startStatusPolling(currentJobId);
     } catch (e) {
-      alert("Retry failed: " + e.message);
+      alert("Bulk retry failed: " + e.message);
     } finally {
       btnRetryFailed.disabled = false;
     }
   });
 
-  // 5. Setup Export Download Links
   function setupExportLinks(jobId) {
     btnDownloadConsolidated.href = `/api/download/${jobId}/consolidated_excel`;
     btnDownloadSubjectWise.href = `/api/download/${jobId}/subject_excel`;
@@ -449,11 +695,23 @@ document.addEventListener("DOMContentLoaded", () => {
     btnDownloadCompleteZip.href = `/api/download/${jobId}/complete_zip`;
   }
 
-  // Reset
-  btnResetApp.addEventListener("click", () => {
-    if (confirm("Reset current batch and prepare a new processing job?")) {
+  btnResetApp.addEventListener("click", async () => {
+    if (confirm("Reset current batch and clear session files?")) {
+      if (currentJobId) {
+        try {
+          await fetch(`/api/cleanup/${currentJobId}`, { method: "DELETE" });
+        } catch (e) {}
+      }
       window.location.reload();
     }
+  });
+
+  // --- 7. FAQ Accordion Interaction ---
+  document.querySelectorAll(".faq-question").forEach(q => {
+    q.addEventListener("click", () => {
+      const item = q.parentElement;
+      item.classList.toggle("open");
+    });
   });
 
 });
