@@ -1,4 +1,4 @@
-// Universal Bulk Academic Result Processor - SkillSum Innovations
+// Universal Bulk SkillSum ResultSetu - SkillSum Innovations
 // Privacy-First Browser-Local Parsing & Responsive Multi-Page Navigation
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Populate branding text across all pages
         document.querySelectorAll(".brand-text-name").forEach(el => {
-          el.textContent = brandConfig.project_name || "Academic Result Processor";
+          el.textContent = brandConfig.project_name || "SkillSum ResultSetu";
         });
         document.querySelectorAll(".brand-text-tagline").forEach(el => {
           el.textContent = brandConfig.tagline || "Simplify bulk academic result processing.";

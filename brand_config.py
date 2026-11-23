@@ -6,15 +6,15 @@ Do NOT hardcode brand names across the application; reference this module instea
 from typing import Dict, Any
 
 # --- Configurable Project Identity ---
-# Placeholders can be updated by setting environment variables or modifying this file.
-PROJECT_NAME = "Academic Result Processor"  # Configurable name placeholder
-PROJECT_SHORT_NAME = "ResultProcessor"
+PROJECT_NAME = "SkillSum ResultSetu"
+PROJECT_SHORT_NAME = "ResultSetu"
+PROJECT_SLUG = "skillsum-resultsetu"
 TAGLINE = "Simplify bulk academic result processing."
 OWNER_NAME = "SkillSum Innovations"
 POSITIONING = "An independent, free and open-source academic result processing utility."
 LICENSE_NAME = "MIT License"
 SUPPORT_EMAIL = "[SUPPORT_EMAIL_PLACEHOLDER]"  # Clearly marked placeholder as instructed
-REPO_URL = "https://github.com/SkillSum/academic-result-processor"
+REPO_URL = "https://github.com/Alex0775edu/skillsum_resultsetu"
 VERSION = "2.1.0"
 
 # --- Privacy & Architecture Constraints ---
@@ -29,6 +29,7 @@ def get_branding_context() -> Dict[str, Any]:
     return {
         "project_name": PROJECT_NAME,
         "project_short_name": PROJECT_SHORT_NAME,
+        "project_slug": PROJECT_SLUG,
         "tagline": TAGLINE,
         "owner_name": OWNER_NAME,
         "positioning": POSITIONING,

@@ -25,6 +25,7 @@ wheels/
 
 # Temporary processing files
 temp_storage/
+test_temp/
 4thsemresult/
 *.log
 
